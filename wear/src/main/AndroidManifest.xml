@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <!--
+      The app's only declared permission, required for the BOOT_COMPLETED filter below to deliver.
+      In particular there is no location permission — the watch receives its position from the phone
+      — and no INTERNET permission: the watch reads cached data and never fetches.
+    -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <uses-library
+            android:name="com.google.android.wearable"
+            android:required="true" />
+
+        <!--
+          Standalone: the app keeps working with no phone present, because the schedule is cached
+          locally and can be recalculated offline.
+        -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.DeviceDefault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          The five complications, every one of them a timeline provider.
+
+          UPDATE_PERIOD_SECONDS=0 on all of them: none polls. That is only safe *because* they are
+          timelines — a provider that answers once and declares no update period is never asked
+          again, which is how the previous non-timeline providers came to be stuck on whichever
+          prayer was next when they were added.
+
+          SHORT_TEXT and RANGED_VALUE only. Each complication is a title/value pair, which is what
+          SHORT_TEXT is; a gauge slot gets the same pair with an arc around it. None of them is a
+          sentence, so LONG_TEXT is deliberately not offered.
+        -->
+
+        <service
+            android:name=".complications.PrayTimeComplicationService"
+            android:exported="true"
+            android:label="@string/complication_pray_time"
+            android:icon="@drawable/ic_complication"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,RANGED_VALUE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
+
+        <service
+            android:name=".complications.AdhanTimeCountdownComplicationService"
+            android:exported="true"
+            android:label="@string/complication_adhan_time_countdown"
+            android:icon="@drawable/ic_complication"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,RANGED_VALUE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
+
+        <service
+            android:name=".complications.PrayerProgressComplicationService"
+            android:exported="true"
+            android:label="@string/complication_prayer_progress"
+            android:icon="@drawable/ic_complication"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,RANGED_VALUE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
+
+        <service
+            android:name=".complications.AdhanCountdownComplicationService"
+            android:exported="true"
+            android:label="@string/complication_adhan_countdown"
+            android:icon="@drawable/ic_complication"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,RANGED_VALUE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
+
+        <service
+            android:name=".complications.AdhanIqamaCountdownComplicationService"
+            android:exported="true"
+            android:label="@string/complication_adhan_iqama_countdown"
+            android:icon="@drawable/ic_complication"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,RANGED_VALUE" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
+
+        <!--
+          Receives prayer data pushed from the phone, scoped to this app's paths so the watch is not
+          woken for unrelated Data Layer traffic.
+        -->
+        <service
+            android:name=".PrayerSyncListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/prayer" />
+            </intent-filter>
+        </service>
+
+        <!--
+          Only the three time-related actions that remain deliverable to manifest receivers under
+          Android's implicit-broadcast restrictions. ACTION_DATE_CHANGED is not exempt and is
+          deliberately absent; the daily rollover is covered by the 48-hour timeline instead.
+        -->
+        <receiver
+            android:name=".TimeChangeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

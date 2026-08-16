@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      Coarse only, and foreground only. Prayer times do not change measurably over a few kilometres,
+      so precise location would cost GPS power for an identical answer. ACCESS_BACKGROUND_LOCATION is
+      deliberately never declared: this app has no reason to know where anyone is when it is closed.
+      Android's Geocoder, used for city lookup, needs no permission at all.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+
+</manifest>

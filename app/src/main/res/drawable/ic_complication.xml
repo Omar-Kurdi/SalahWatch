@@ -1,0 +1,31 @@
+<!--
+  The complication picker draws this small and tints it a single colour, so the launcher's
+  brass-against-track contrast is unavailable. Reduced to a ring, which reads as a watch dial and
+  separates this from every other crescent in the picker, and a crescent weighted to survive 24dp.
+
+  The crescent is one closed path of two arcs meeting at the horn tips.
+
+  It is NOT two circles with an even-odd fill: that computes the symmetric difference, which leaves
+  the second lune visible on the opposite side — the icon showed two crescents.
+
+  Its **bounding box** is centred, not its outer circle. A lune's mass sits well off the centre of
+  the circle it is cut from, so centring that circle still reads as off-centre; the earlier path did
+  exactly that and sat low and left. Regenerated from the same (radius, cutter offset, angle) the
+  original was drawn with, so the shape is unchanged and only its position moved.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?android:attr/colorControlNormal">
+
+    <path
+        android:pathData="M1.80,12.00 a10.20,10.20 0 1,0 20.40,0 a10.20,10.20 0 1,0 -20.40,0 Z"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.4" />
+
+    <path
+        android:pathData="M11.17,5.52 A6.60,6.60 0 1,0 17.63,16.54 A6.60,6.60 0 0,1 11.17,5.52 Z"
+        android:fillColor="@android:color/white" />
+</vector>
