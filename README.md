@@ -242,7 +242,7 @@ app. The watch app has no `INTERNET` permission.
 Full text in [docs/PRIVACY_POLICY.md](docs/PRIVACY_POLICY.md), and the Play declarations it maps to
 in [docs/DATA_SAFETY.md](docs/DATA_SAFETY.md).
 
-## Licence
+## License
 
-Not yet chosen, which means all rights reserved by default. This is a blocker for release, not an
-oversight to be left standing — see [docs/PLAY_STORE.md](docs/PLAY_STORE.md). `adhan2` is MIT.
+Free for personal, educational, and other non-commercial use — see [LICENSE](LICENSE) for the
+full terms. Commercial use requires separate written permission from the copyright holder.
