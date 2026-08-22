@@ -6,7 +6,7 @@ Glance at your watch face and see the next prayer, when the Adhan is called, whe
 starts, and how long you have. Five separate complication providers mean you can fill several slots
 on one watch face independently.
 
-> **Status:** building and installing, 211 unit tests passing, lint clean. Several paths are built
+> **Status:** building and installing, 243 unit tests passing, lint clean. Several paths are built
 > and unit-tested but have not yet been exercised on hardware. **[STATUS.md](STATUS.md)** lists what
 > is verified, what is not, and what remains before release.
 
@@ -196,7 +196,7 @@ empty state.
 
 ```
 build-logic/       convention plugins (included build, not buildSrc)
-app/               phone: today's schedule, date browsing, settings, location, home widget
+app/               phone: today's schedule, date browsing, settings, location, 2 home widgets
 wear/              watch app + 5 complication services
 core/model         domain types — pure JVM
 core/calculation   PrayerCalendar, phase engine, adhan2 wrapper — pure JVM
@@ -213,11 +213,12 @@ timezone, DST and midnight-rollover logic is unit-testable without an emulator.
 
 ## Verification status
 
-**Done:** 211 unit tests passing, detekt clean, lint clean, all four APKs build. Covered by tests: DST
+**Done:** 243 unit tests passing, detekt clean, lint clean, all four APKs build. Covered by tests: DST
 transitions in both directions, timezone travel, Isha Iqama crossing midnight, the year boundary,
 cache invalidation on moving or changing method, GPS jitter tolerance, Data Layer payload limits,
 mosque calendar validation, corrections applied on read, both forms a mosque publishes its Iqama in,
-the widget's Adhan → Iqama → next-prayer cycle and the instants at which it re-renders,
+the widgets' Adhan → Iqama → next-prayer cycle, the instants at which they re-render, how they
+scale to the space a launcher gives them,
 that a phase timeline is contiguous with no instant uncovered, and that a countdown's gauge measures
 the whole wait rather than resetting when the text switches to seconds.
 

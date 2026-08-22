@@ -50,6 +50,30 @@
                 android:resource="@xml/prayer_widget_info" />
         </receiver>
 
+        <!--
+            The one-row strip. Same filters, own alarm — see BasePrayerWidgetProvider.
+            ACTION_APPWIDGET_OPTIONS_CHANGED is deliberately not listed on either: the platform
+            delivers it to onAppWidgetOptionsChanged without a filter entry.
+        -->
+        <receiver
+            android:name=".widget.PrayerStripWidgetProvider"
+            android:exported="true"
+            android:label="@string/strip_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.salahwatch.app.widget.TICK" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.DATE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="com.salahwatch.data.prayersync.TIMES_CHANGED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_strip_widget_info" />
+        </receiver>
+
     </application>
 
 </manifest>

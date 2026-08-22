@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The one-row strip widget: five prayers across a single cell of home screen.
+
+    Columns are weighted rather than fixed, so the strip fills whatever width it is given and each
+    column keeps an equal share of it. `gravity="top"` on the row matters: the countdown line is
+    present in every column but visible in only one, and without it the four short columns would
+    centre themselves against the tall one and the times would stop forming a line.
+
+    The hardcoded values are placeholders that also serve as the widget picker's preview, which
+    inflates this file without ever running the binder. Every one is overwritten by StripWidgetViews.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/strip_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="6dp">
+
+    <LinearLayout
+        android:id="@+id/strip_columns"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal"
+        android:gravity="top">
+
+        <LinearLayout
+            android:id="@+id/strip_0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/strip_0_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_prayer_fajr"
+                android:contentDescription="@string/prayer_fajr" />
+
+            <TextView
+                android:id="@+id/strip_0_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="Fajr"
+                android:textSize="10sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/strip_0_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4:35 AM"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_0_countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_accent"
+                android:maxLines="1"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/strip_1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/strip_1_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_prayer_dhuhr"
+                android:contentDescription="@string/prayer_dhuhr" />
+
+            <TextView
+                android:id="@+id/strip_1_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="Dhuhr"
+                android:textSize="10sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/strip_1_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12:24 PM"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_1_countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_accent"
+                android:maxLines="1"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/strip_2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/strip_2_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_prayer_asr"
+                android:contentDescription="@string/prayer_asr" />
+
+            <TextView
+                android:id="@+id/strip_2_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="Asr"
+                android:textSize="10sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/strip_2_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3:49 PM"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_2_countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_accent"
+                android:maxLines="1"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/strip_3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/strip_3_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_prayer_maghrib"
+                android:contentDescription="@string/prayer_maghrib" />
+
+            <TextView
+                android:id="@+id/strip_3_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="Maghrib"
+                android:textSize="10sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/strip_3_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6:48 PM"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_3_countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_accent"
+                android:maxLines="1"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/strip_4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/strip_4_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_prayer_isha"
+                android:contentDescription="@string/prayer_isha" />
+
+            <TextView
+                android:id="@+id/strip_4_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="Isha"
+                android:textSize="10sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/strip_4_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="8:18 PM"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_4_countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_accent"
+                android:maxLines="1"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/strip_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textColor="@color/widget_ink_muted"
+        android:visibility="gone" />
+</FrameLayout>

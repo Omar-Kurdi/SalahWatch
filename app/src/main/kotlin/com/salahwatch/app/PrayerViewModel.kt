@@ -10,7 +10,7 @@ import com.salahwatch.core.model.AppLanguage
 import com.salahwatch.core.preferences.PreferencesRepository
 import com.salahwatch.core.preferences.UserPreferences
 import com.salahwatch.core.preferences.languageChanges
-import com.salahwatch.app.widget.PrayerWidgetProvider
+import com.salahwatch.app.widget.BasePrayerWidgetProvider
 import com.salahwatch.data.location.DeviceLocationProvider
 import com.salahwatch.data.location.PlaceLookup
 import com.salahwatch.data.prayersync.MawaqitClient
@@ -154,9 +154,9 @@ public class PrayerViewModel(application: Application) : AndroidViewModel(applic
         if (selected == today) {
             publish(prefs)
 
-            // The widget reads the same cache but observes nothing, so a settings change made here
-            // — an Iqama offset, a correction — would not reach it until its next scheduled redraw.
-            PrayerWidgetProvider.refresh(getApplication())
+            // The widgets read the same cache but observe nothing, so a settings change made here
+            // — an Iqama offset, a correction — would not reach them until their next redraw.
+            BasePrayerWidgetProvider.refreshAll(getApplication())
         }
     }
 

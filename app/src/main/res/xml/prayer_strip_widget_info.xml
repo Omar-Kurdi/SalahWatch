@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The one-row strip. See prayer_widget_info.xml for why updatePeriodMillis is zero.
+
+    Both `targetCellWidth`/`targetCellHeight` and `minWidth`/`minHeight` are set, and they have to
+    agree: the cell counts are honoured from API 31, and everything before that sizes the initial
+    placement from the dp values alone.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/widget_prayer_strip"
+    android:previewLayout="@layout/widget_prayer_strip"
+    android:minWidth="250dp"
+    android:minHeight="60dp"
+    android:minResizeWidth="140dp"
+    android:minResizeHeight="50dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="1"
+    android:resizeMode="horizontal"
+    android:widgetCategory="home_screen"
+    android:description="@string/strip_widget_description"
+    android:updatePeriodMillis="0" />

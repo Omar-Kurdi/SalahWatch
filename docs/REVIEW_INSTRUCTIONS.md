@@ -107,15 +107,16 @@ see blocker 1 in [PLAY_STORE.md](PLAY_STORE.md).
 
 ---
 
-## The home screen widget
+## The home screen widgets
 
-`SalahWatch` also installs a phone home screen widget, listed as "Prayer times". It shows the day's
-five prayers plus sunrise and counts down to the next Adhan or Iqama.
+`SalahWatch` also installs two phone home screen widgets — "Prayer times", showing the day's five
+prayers plus sunrise, and "Prayer row", a single row of five prayers. Both count down to the next
+Adhan or Iqama.
 
-It requests no permission of its own beyond `RECEIVE_BOOT_COMPLETED`, which exists solely so it can
-re-arm its own redraw alarm after a restart — alarms do not survive a reboot, and without it a placed
-widget would silently freeze on the previous day's times. It reads the same locally cached prayer
-times the app already holds and performs no network access of its own.
+They request no permission of its own beyond `RECEIVE_BOOT_COMPLETED`, which exists solely so it can
+re-arm their own redraw alarms after a restart — alarms do not survive a reboot, and without it a placed
+widget would silently freeze on the previous day's times. They read the same locally cached prayer
+times the app already holds and perform no network access of their own.
 
-Note that it does **not** request `SCHEDULE_EXACT_ALARM` or `USE_EXACT_ALARM`. Its redraw alarms are
+Note that neither requests `SCHEDULE_EXACT_ALARM` or `USE_EXACT_ALARM`. The redraw alarms are
 inexact by design.

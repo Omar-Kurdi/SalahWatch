@@ -94,4 +94,6 @@
     <string name="date_tomorrow">غدًا</string>
     <string name="widget_label">مواقيت الصلاة</string>
     <string name="widget_description">مواقيت اليوم، مع العد التنازلي للأذان أو الإقامة القادمة.</string>
+    <string name="strip_widget_label">صف الصلوات</string>
+    <string name="strip_widget_description">الصلوات الخمس في صف واحد، مع العد التنازلي للصلاة القادمة.</string>
 </resources>

@@ -7,7 +7,7 @@ Read this first, then [RESEARCH.md](RESEARCH.md) for why the technical decisions
 
 ## Current state
 
-Ten modules, two apps, **211 unit tests passing**, detekt clean, lint clean, all four APKs
+Ten modules, two apps, **243 unit tests passing**, detekt clean, lint clean, all four APKs
 building.
 
 | | State |
@@ -15,7 +15,7 @@ building.
 | Wear app + 5 complication providers | Built; complications render in the watch face picker |
 | Phone app — Today, Settings, location | Built and installed |
 | Phone app — date browsing (±1 month) | Built, **not yet seen on a screen** |
-| Home screen widget | Built and unit-tested, **not yet placed on a home screen** |
+| Home screen widgets (schedule + strip) | Built and unit-tested, **neither yet placed on a home screen** |
 | Prayer times — calculation | Working, cached a year at a time |
 | Prayer times — nearby mosque | Built and unit-tested, **not yet run on a device** |
 | Phone → watch sync (Data Layer) | Built, **not yet tested between two real devices** |
@@ -32,10 +32,15 @@ The phase logic is unit-tested, but two things can only be confirmed by sitting 
 a prayer: that a countdown rolls over at the Adhan, and that a gauge sweeps without resetting when
 its text switches to seconds.
 
-The widget's content logic is unit-tested — the Adhan → Iqama → next-prayer cycle, both seconds
-thresholds, the midnight case, and the alarm instants — but three things depend on the device: that
-the RemoteViews layout inflates and fits, that the `Chronometer` counts *down* rather than up, and
-that the alarm actually fires close enough to the boundary to look instant.
+The widgets' content logic is unit-tested — the Adhan → Iqama → next-prayer cycle, both seconds
+thresholds, the midnight case, the alarm instants, and the size tiers — but four things depend on
+the device: that the RemoteViews layouts inflate and fit, that the `Chronometer` counts *down*
+rather than up, that the alarm fires close enough to the boundary to look instant, and that the
+launcher's reported widget options match what the size tiers assume. That last one is the number
+most worth checking first: the tiers are tuned against an assumed ~70dp cell.
+
+The six prayer icons were rendered to PNG and inspected at both 96px and 20px, so they are known to
+read at size — but not how they sit against a real wallpaper.
 
 The Arabic typography changes are likewise unverified by eye. What was measured is the mechanism:
 under an `ar` locale `String.format("%d")` emits Arabic-Indic digits, which the monospace face does

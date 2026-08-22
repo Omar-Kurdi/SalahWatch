@@ -23,7 +23,7 @@ complication unreadable at thumbnail size, which is the size most people will ju
 
 ---
 
-## Phone — 8 shots
+## Phone — 9 shots
 
 Portrait, 1080 × 2400 or the device's own resolution. Play accepts 2–8; six is enough to tell the
 story without repetition.
@@ -36,8 +36,9 @@ story without repetition.
 | 4 | **Settings** — prayer times from | The source radio pair with "Nearby mosque" selected and the mosque list beneath | Each mosque must appear **once**. The chosen one is brass in the list and is not also repeated above it |
 | 5 | **Settings** — method and school | The method dropdown open, angles visible beside each name | The angles are what distinguishes the methods; a closed dropdown shows nothing useful |
 | 6 | **Settings** — Iqama and corrections | The Iqama source pair, the five offsets, the six correction steppers | Set one correction to a non-zero value so the brass `+2` reads against the muted zeros |
-| 7 | **Home screen widget** | The widget on a real home screen, over a wallpaper, with the next prayer counting down | Take it inside the seconds window so the `Chronometer` is visibly ticking in `mm:ss`. Check it is counting **down** — a Chronometer that counts up means `setChronometerCountDown` did not take |
-| 8 | **Today**, a future date | The month grid open, or a date a week ahead selected | On another date the clock, the day arc and the next-prayer panel are all absent by design. If a countdown is visible on a future date, that is a bug, not a shot |
+| 7 | **Schedule widget** | The widget on a real home screen, over a wallpaper, with the next prayer counting down | Take it inside the seconds window so the `Chronometer` is visibly ticking in `mm:ss`. Check it is counting **down** — a Chronometer that counts up means `setChronometerCountDown` did not take |
+| 8 | **Strip widget** | The one-row widget on a home screen, with the upcoming prayer boxed | Five columns, evenly spaced. The icons must be distinguishable from each other at real size — Dhuhr and Asr are separated only by where the sun sits |
+| 9 | **Today**, a future date | The month grid open, or a date a week ahead selected | On another date the clock, the day arc and the next-prayer panel are all absent by design. If a countdown is visible on a future date, that is a bug, not a shot |
 
 ### While taking these, check the things only a screen can show
 

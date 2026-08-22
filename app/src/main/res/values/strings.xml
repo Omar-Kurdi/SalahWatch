@@ -94,4 +94,6 @@
     <string name="date_tomorrow">Tomorrow</string>
     <string name="widget_label">Prayer times</string>
     <string name="widget_description">Today\'s prayer times, with the next Adhan or Iqama counting down.</string>
+    <string name="strip_widget_label">Prayer row</string>
+    <string name="strip_widget_description">The five prayers in a single row, with the next one counting down.</string>
 </resources>

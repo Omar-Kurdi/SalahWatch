@@ -111,9 +111,10 @@ fails falls back to calculation rather than showing you something confidently wr
 
 ON YOUR PHONE TOO
 
-A home screen widget shows all five prayers and sunrise with their Adhan and Iqama
-times, headed by the next one counting down — and it counts down without the app running
-at all. Browse any day within a month either way to check a time in advance, or look back
+Two home screen widgets, and both count down without the app running at all. One shows
+all five prayers and sunrise with their Adhan and Iqama times, and scales to whatever
+size you give it. The other is a single row: five prayers across, with the next one
+boxed. Browse any day within a month either way to check a time in advance, or look back
 at one.
 
 WORKS WITHOUT YOUR PHONE
@@ -134,7 +135,7 @@ ALSO
 • Iqama from your own offsets, or from the mosque's published times
 • Per-prayer corrections, in minutes, against your local timetable
 • Gregorian and Hijri dates, from the Umm al-Qura calendar
-• A home screen widget for the phone
+• Two home screen widgets for the phone, one full, one a single row
 • Any date within a month either way, by day or from a month grid
 • Full Arabic, including right-to-left layout
 • Light and dark themes on the phone; the watch is always dark, because an unlit pixel
@@ -150,7 +151,7 @@ sent to the prayer-time services only to work out prayer times for where you are
 ### Promotional text / release notes (500 characters max)
 
 ```
-First release. Five Wear OS complications, a home screen widget for the phone, prayer
+First release. Five Wear OS complications, two home screen widgets for the phone, prayer
 times from calculation or from a nearby mosque's own published timetable, a full year
 cached for offline use, English and Arabic.
 ```
@@ -189,8 +190,10 @@ phone's.
 - [ ] Data safety form completed from [DATA_SAFETY.md](DATA_SAFETY.md)
 - [ ] Content rating questionnaire completed
 - [ ] Phone and Wear screenshots captured per [SCREENSHOT_PLAN.md](SCREENSHOT_PLAN.md)
-- [ ] Widget placed on a real home screen and watched across an Adhan and its Iqama — the
+- [ ] Both widgets placed on a real home screen and watched across an Adhan and its Iqama — the
       `Chronometer` counting down rather than up, and the alarm firing close to the boundary
+- [ ] Schedule widget resized from four cells down to two: all six entries still present at every
+      size, nothing clipped
 - [ ] Arabic checked by eye on a real screen: numerals European, times still in a straight
       column, prayer names no longer letter-spaced apart
 - [ ] Reviewer notes pasted from [REVIEW_INSTRUCTIONS.md](REVIEW_INSTRUCTIONS.md)

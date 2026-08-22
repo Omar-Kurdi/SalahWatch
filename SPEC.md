@@ -291,10 +291,13 @@ estimate of them.
 **Settings** — prayer time source and mosque, location, appearance, language, method, school,
 twilight (when relevant), Iqama source and offsets, per-prayer corrections.
 
-### Home screen widget
+### Home screen widgets
 
-The five prayers and sunrise with their Adhan and Iqama times, headed by the next Adhan or Iqama
-counting down. It follows the same cycle as complication (e): after an Adhan the countdown turns to
+Two, answering different questions. Both read the same cache and share one implementation; they
+differ only in how they draw it.
+
+**Schedule widget.** The five prayers and sunrise with their Adhan and Iqama times, headed by the
+next Adhan or Iqama counting down. It follows the same cycle as complication (e): after an Adhan the countdown turns to
 that prayer's own Iqama, and only once that passes does the next prayer take over. Sunrise is listed
 but never counted down to. Tapping it opens the app.
 
@@ -312,7 +315,24 @@ Lateness is bounded and visible rather than corrupting: a `Chronometer` past its
 *up* from zero, so an alarm that fires late reads as a countdown that has bounced off zero, not as a
 wrong time. The next redraw corrects it.
 
-The widget follows the system light/dark setting rather than the in-app theme preference. It is
+It targets three cells square and resizes down to about two. It does not clip as it shrinks —
+chrome goes first (the date and location line, then the estimate notice, then the divider), then the
+Iqama column on narrow widgets, then type and padding come down. **All six entries survive every
+size**, because a timetable missing its last prayer is worse than a small one.
+
+Sizing comes from the launcher's reported options rather than from separate layouts per breakpoint,
+so there is one layout to keep correct. Note the options bundle is empty on first placement; that is
+treated as "full size", because guessing small on a large widget looks like a defect while guessing
+large on a small one is corrected within a frame.
+
+**Strip widget.** One row, four cells by one. Five prayers across, each with an icon, its name and
+its Adhan time. The prayer being counted to is boxed, and its countdown appears beneath it once
+inside the seconds window — driven by the same phase timeline, with no threshold of its own.
+
+Sunrise is not among the five. Five columns leave each one wide enough for a time and a countdown;
+six do not.
+
+Both widgets follow the system light/dark setting rather than the in-app theme preference. They are
 drawn by the launcher, which has no access to the app's own setting.
 
 ---

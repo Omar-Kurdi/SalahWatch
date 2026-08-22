@@ -21,8 +21,9 @@
     android:background="@drawable/widget_background"
     android:padding="12dp">
 
-    <!-- Header: which day, and where these times are for. -->
+    <!-- Header: which day, and where these times are for. Hidden on short widgets. -->
     <LinearLayout
+        android:id="@+id/widget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"

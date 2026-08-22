@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import com.salahwatch.app.MainActivity
@@ -29,7 +30,12 @@ internal object WidgetViews {
     private const val TIME_PATTERN = "h:mm a"
     private const val DATE_PATTERN = "EEEE d MMMM"
 
-    fun build(context: Context, content: WidgetContent, now: Instant): RemoteViews {
+    fun build(
+        context: Context,
+        content: WidgetContent,
+        now: Instant,
+        layout: GridLayout,
+    ): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.widget_prayer)
         val locale = context.resources.configuration.locales[0]
         // Latin digits, for the same reason the app forces them — see Formatting.kt. It matters
@@ -46,25 +52,31 @@ internal object WidgetViews {
         }
 
         views.setViewVisibility(R.id.widget_empty, View.GONE)
-        views.setTextViewText(R.id.widget_date, date.format(content.date))
-        views.setTextViewText(R.id.widget_location, content.locationLabel.orEmpty())
 
-        views.bindHeadline(context, content, now, time)
-        views.bindRows(context, content, time)
+        views.setViewVisibility(R.id.widget_header, layout.showHeader.asVisibility())
+        if (layout.showHeader) {
+            views.setTextViewText(R.id.widget_date, date.format(content.date))
+            views.setTextViewText(R.id.widget_location, content.locationLabel.orEmpty())
+        }
+        views.setViewVisibility(R.id.widget_divider, layout.showDivider.asVisibility())
 
-        views.setViewVisibility(
-            R.id.widget_notice,
-            if (content.isEstimated) View.VISIBLE else View.GONE,
-        )
-        if (content.isEstimated) {
+        views.bindHeadline(context, content, now, time, layout)
+        views.bindRows(context, content, time, layout)
+
+        val notice = layout.showNotice && content.isEstimated
+        views.setViewVisibility(R.id.widget_notice, notice.asVisibility())
+        if (notice) {
             views.setTextViewText(R.id.widget_notice, context.getString(R.string.label_estimated))
         }
 
         return views
     }
 
+    private fun Boolean.asVisibility(): Int = if (this) View.VISIBLE else View.GONE
+
     /** No location yet. The timetable is hidden entirely rather than shown as a row of dashes. */
     private fun RemoteViews.asEmptyState(context: Context): RemoteViews = apply {
+        setViewVisibility(R.id.widget_header, View.GONE)
         setViewVisibility(R.id.widget_headline, View.GONE)
         setViewVisibility(R.id.widget_rows, View.GONE)
         setViewVisibility(R.id.widget_divider, View.GONE)
@@ -87,6 +99,7 @@ internal object WidgetViews {
         content: WidgetContent,
         now: Instant,
         time: DateTimeFormatter,
+        layout: GridLayout,
     ) {
         val headline = content.headline
         if (headline == null) {
@@ -105,6 +118,14 @@ internal object WidgetViews {
             ),
         )
         setTextViewText(R.id.widget_headline_prayer, context.prayerName(headline.prayer))
+        setTextViewTextSize(
+            R.id.widget_headline_prayer,
+            TypedValue.COMPLEX_UNIT_SP,
+            layout.prayerTextSp,
+        )
+        for (id in intArrayOf(R.id.widget_countdown_clock, R.id.widget_countdown_ticker)) {
+            setTextViewTextSize(id, TypedValue.COMPLEX_UNIT_SP, layout.countdownTextSp)
+        }
 
         when (headline.style) {
             CountdownStyle.CLOCK -> {
@@ -135,9 +156,14 @@ internal object WidgetViews {
         context: Context,
         content: WidgetContent,
         time: DateTimeFormatter,
+        layout: GridLayout,
     ) {
         setViewVisibility(R.id.widget_rows, View.VISIBLE)
-        setViewVisibility(R.id.widget_divider, View.VISIBLE)
+
+        // setViewPadding takes *pixels*, not dp. Passing dp straight through is a silent bug: the
+        // widget renders with a few pixels of padding on a high-density screen and reads as a
+        // layout mistake rather than a unit one.
+        val pad = (layout.rowPaddingDp * context.resources.displayMetrics.density).toInt()
 
         for (slot in ROW.indices) {
             val row = content.rows.getOrNull(slot)
@@ -152,6 +178,7 @@ internal object WidgetViews {
                 "setBackgroundResource",
                 if (row.isNext) R.drawable.widget_row_highlight else 0,
             )
+            setViewPadding(ROW[slot], sidePadding(context), pad, sidePadding(context), pad)
 
             val ink = context.getColor(
                 when {
@@ -163,12 +190,15 @@ internal object WidgetViews {
 
             setTextViewText(NAME[slot], context.prayerName(row.prayer))
             setTextColor(NAME[slot], ink)
+            setTextViewTextSize(NAME[slot], TypedValue.COMPLEX_UNIT_SP, layout.rowTextSp)
 
             setTextViewText(ADHAN[slot], time.format(row.adhan.atZone(content.zone)))
             setTextColor(ADHAN[slot], ink)
+            setTextViewTextSize(ADHAN[slot], TypedValue.COMPLEX_UNIT_SP, layout.rowTextSp)
 
             // Sunrise has no congregation, so the column is blank rather than filled with a dash
             // that would read as missing data — matching the in-app schedule.
+            setViewVisibility(IQAMA[slot], layout.showIqama.asVisibility())
             setTextViewText(
                 IQAMA[slot],
                 row.iqama?.let { time.format(it.atZone(content.zone)) } ?: "",
@@ -179,8 +209,15 @@ internal object WidgetViews {
                     if (row.hasPassed && !row.isNext) R.color.widget_ink_faint else R.color.widget_ink_muted,
                 ),
             )
+            setTextViewTextSize(IQAMA[slot], TypedValue.COMPLEX_UNIT_SP, layout.rowTextSp)
         }
     }
+
+    /** Horizontal room stays constant; only the vertical rhythm compresses. */
+    private fun sidePadding(context: Context): Int =
+        (SIDE_PADDING_DP * context.resources.displayMetrics.density).toInt()
+
+    private const val SIDE_PADDING_DP = 8
 
     private fun Context.prayerName(prayer: Prayer): String = getString(
         when (prayer) {
