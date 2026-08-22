@@ -7,7 +7,7 @@ Read this first, then [RESEARCH.md](RESEARCH.md) for why the technical decisions
 
 ## Current state
 
-Ten modules, two apps, **243 unit tests passing**, detekt clean, lint clean, all four APKs
+Ten modules, two apps, **261 unit tests passing**, detekt clean, lint clean, all four APKs
 building.
 
 | | State |
@@ -116,10 +116,17 @@ location, listed with its own Iqama offsets. What remains unknown there is cover
 Mawaqit is dense in some cities and sparse in others — and whether the 45-minute sunrise tolerance
 rejects the right calendars in practice.
 
-### 4. Choose a licence
+### 4. ~~Choose a licence~~ — chosen
 
-`README.md` says "not yet chosen", which means all rights reserved by default. `adhan2` is MIT and
-its notice must be carried either way. A release blocker.
+[LICENSE](LICENSE) is a personal and non-commercial licence; commercial use needs written
+permission. Note this is **not** an open-source licence, which is a deliberate choice rather than an
+oversight — it does not affect Play distribution, but it does mean the project cannot be described
+as open source.
+
+Third-party attribution is done: [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) carries adhan2's
+MIT notice and the full Apache 2.0 text, is synced into both APKs as a raw resource by a Gradle task
+so the two cannot drift, and is readable in the phone app under Settings → About. Verified present
+in all four artifacts rather than assumed from the build.
 
 ### 5. Release signing
 

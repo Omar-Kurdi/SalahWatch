@@ -50,6 +50,7 @@ internal fun SettingsScreen(preferences: UserPreferences, viewModel: PrayerViewM
 
         item { IqamaSection(preferences, viewModel) }
         item { AdjustmentsSection(preferences.calculation, viewModel) }
+        item { AboutSection() }
     }
 }
 

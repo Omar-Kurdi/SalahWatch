@@ -89,4 +89,5 @@
     <string name="complication_prayer_progress">Prayer Progress</string>
     <string name="complication_adhan_countdown">Adhan Countdown</string>
     <string name="complication_adhan_iqama_countdown">Adhan / Iqama Countdown</string>
+    <string name="watch_licences">Prayer times calculated with Adhan (MIT). Open source licences in the phone app.</string>
 </resources>

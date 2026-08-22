@@ -3,7 +3,10 @@
 Two separate sets. Play treats the phone and Wear OS form factors as different listings, and the
 Wear one will not accept phone screenshots — a round 384 × 384 frame is a hard requirement there.
 
-This doubles as the device-testing checklist. Every shot below is a screen that has not yet been
+This doubles as the device-testing checklist. Several of these screens have since been captured and
+are in [docs/images](images) and the README; what follows is still the list to work from for the
+store assets, which need clean, deliberately composed shots rather than whatever the device happened
+to be showing. Every shot below is a screen that has not yet been
 seen running, so capturing the set *is* the verification pass: if a shot cannot be taken, that is
 the bug report.
 

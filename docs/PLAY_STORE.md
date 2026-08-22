@@ -11,11 +11,11 @@ time pressure. Facts here are taken from the built release APKs, not from intent
 | # | Blocker | Why it blocks | Where |
 |---|---|---|---|
 | 1 | **Release builds are signed with the debug key** | Play rejects the debug certificate outright. Worse, anything already sideloaded with it can never be updated by a properly-signed build — those installs must be uninstalled | `app/build.gradle.kts`, `wear/build.gradle.kts`, both `buildTypes.release` |
-| 2 | **No licence chosen** | Absent a licence the work is all-rights-reserved by default, which is a decision rather than an omission and should be made deliberately. `adhan2` is MIT and its notice must be carried either way | `README.md` §Licence |
+| 2 | ~~No licence chosen~~ — **done** | [LICENSE](../LICENSE) is a personal and non-commercial licence. Not an open-source one, so the project must not be described as open source. `adhan2`'s MIT notice and the Apache 2.0 text are carried in [THIRD_PARTY_NOTICES.txt](../THIRD_PARTY_NOTICES.txt), shipped inside both APKs | [LICENSE](../LICENSE) |
 | 3 | **Privacy policy has no public URL** | Play requires a URL, not a file. [PRIVACY_POLICY.md](PRIVACY_POLICY.md) is the text; it still has to be *hosted* somewhere reachable without login | see that file's header |
 | 4 | **`versionCode` is 1 on both apps** | Fine for a first upload, but phone and watch must be bumped together for every subsequent one | both `build.gradle.kts` |
 
-Items 1–3 are hard stops. Nothing else on this page matters until they are done.
+Items 1 and 3 are the remaining hard stops. Nothing else on this page matters until they are done.
 
 ---
 
@@ -185,7 +185,7 @@ phone's.
 ## Pre-submission checklist
 
 - [ ] Real upload keystore created, stored outside the repo, backed up; `signingConfig` replaced in both modules
-- [ ] Licence chosen, `README.md` updated, `adhan2`'s MIT notice carried
+- [x] Licence chosen, `README.md` updated, `adhan2`'s MIT notice carried in both APKs
 - [ ] Privacy policy hosted at a public URL; URL entered in the Play Console
 - [ ] Data safety form completed from [DATA_SAFETY.md](DATA_SAFETY.md)
 - [ ] Content rating questionnaire completed

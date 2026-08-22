@@ -3,7 +3,29 @@ plugins {
     id("salahwatch.android.compose")
 }
 
+/**
+ * The third-party notices, compiled in as a raw resource.
+ *
+ * `THIRD_PARTY_NOTICES.txt` at the repo root is the single canonical copy, synced into this
+ * module's generated resources rather than duplicated per app. Two hand-maintained copies of a
+ * legal notice drift, and the one that drifts is the one nobody reads until it matters.
+ *
+ * MIT (adhan2) requires its notice to accompany every copy of the software, and Apache 2.0 section
+ * 4(a) requires shipping the licence itself — so this has to be inside the APK, not merely in the
+ * repository.
+ */
+val syncThirdPartyNotices by tasks.registering(Sync::class) {
+    from(rootProject.file("THIRD_PARTY_NOTICES.txt")) {
+        into("raw")
+        // Resource file names must be lowercase and free of punctuation beyond the extension.
+        rename { "third_party_notices.txt" }
+    }
+    into(layout.buildDirectory.dir("generated/notices/res"))
+}
+
 android {
+    sourceSets["main"].res.srcDir(layout.buildDirectory.dir("generated/notices/res"))
+
     namespace = "com.salahwatch.wear"
 
     defaultConfig {
@@ -49,3 +71,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
 }
+
+// srcDir() above takes a path, not a task, so it carries no dependency of its own — without this
+// the sync never runs and the notices are silently absent from the APK. They were, once.
+tasks.named("preBuild") { dependsOn(syncThirdPartyNotices) }

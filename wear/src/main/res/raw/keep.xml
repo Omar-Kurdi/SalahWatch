@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Keeps the third-party notices in the watch APK.
+
+    Nothing in the watch app's code references `@raw/third_party_notices` — it has no screen large
+    enough to display fifteen kilobytes of licence text, and points at the phone app instead. That
+    makes the resource look unused, so enabling `shrinkResources` would strip it and the APK would
+    quietly stop carrying the MIT and Apache notices it is legally required to ship.
+
+    Resource shrinking is currently off, so this is insurance against a future build change rather
+    than a fix for today.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/third_party_notices" />

@@ -99,4 +99,9 @@
     <string name="countdown_hours_short">%1$d س</string>
     <string name="countdown_minutes_short">%1$d د</string>
     <string name="countdown_under_minutes_short">أقل من %1$d د</string>
+    <string name="settings_about">حول التطبيق</string>
+    <string name="settings_about_desc">تراخيص البرمجيات التي بُني عليها التطبيق.</string>
+    <string name="action_view_licences">تراخيص المصادر المفتوحة</string>
+    <string name="settings_licences">تراخيص المصادر المفتوحة</string>
+    <string name="action_close">إغلاق</string>
 </resources>

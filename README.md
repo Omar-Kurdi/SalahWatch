@@ -6,9 +6,34 @@ Glance at your watch face and see the next prayer, when the Adhan is called, whe
 starts, and how long you have. Five separate complication providers mean you can fill several slots
 on one watch face independently.
 
-> **Status:** building and installing, 243 unit tests passing, lint clean. Several paths are built
-> and unit-tested but have not yet been exercised on hardware. **[STATUS.md](STATUS.md)** lists what
-> is verified, what is not, and what remains before release.
+> **Status:** running on real hardware — a Galaxy S23 Ultra and a Galaxy Watch — with 261 unit tests
+> passing and lint clean. Both apps, both widgets and the complications have been seen working.
+> **[STATUS.md](STATUS.md)** lists what is verified, what is not, and what remains before release.
+
+---
+
+## What it looks like
+
+All taken from a Galaxy S23 Ultra and a Galaxy Watch, running the current build.
+
+| Watch face | Watch app |
+|---|---|
+| ![Two complications on a watch face](docs/images/watch-face.png) | ![The watch app](docs/images/watch-app.png) |
+| Two of the five providers filling separate slots — the next prayer's time on the left, its countdown on the right. | Opened by tapping any complication: what is next, how long, both calendars, and the day on the bezel. |
+
+The one-row strip widget. The prayer being counted to is boxed and ticks to the second; the rest
+show how long in whole hours, and prayers already passed are dimmed.
+
+![The strip widget](docs/images/widget-strip.png)
+
+| Today | Any date, ±1 month | Arabic |
+|---|---|---|
+| ![Today](docs/images/phone-today.png) | ![Date picker](docs/images/phone-date-picker.png) | ![Arabic](docs/images/phone-arabic.png) |
+
+The schedule widget, which scales from three cells square down to two without ever dropping a
+prayer:
+
+![The schedule widget](docs/images/widget-schedule.png)
 
 ---
 
@@ -213,7 +238,7 @@ timezone, DST and midnight-rollover logic is unit-testable without an emulator.
 
 ## Verification status
 
-**Done:** 243 unit tests passing, detekt clean, lint clean, all four APKs build. Covered by tests: DST
+**Done:** 261 unit tests passing, detekt clean, lint clean, all four APKs build. Covered by tests: DST
 transitions in both directions, timezone travel, Isha Iqama crossing midnight, the year boundary,
 cache invalidation on moving or changing method, GPS jitter tolerance, Data Layer payload limits,
 mosque calendar validation, corrections applied on read, both forms a mosque publishes its Iqama in,
@@ -222,8 +247,14 @@ scale to the space a launcher gives them,
 that a phase timeline is contiguous with no instant uncovered, and that a countdown's gauge measures
 the whole wait rather than resetting when the text switches to seconds.
 
-**Not yet verified on hardware:** nearby-mosque times, phone↔watch sync, the light theme, Arabic,
-and complication behaviour on a real watch face. See [STATUS.md](STATUS.md).
+**Verified on hardware:** the phone app and the watch app, phone → watch sync between two real
+devices, the nearby-mosque source finding and applying a real mosque's Iqama offsets, date browsing,
+Arabic with European numerals throughout, both home screen widgets rendering with the countdown
+ticking down, and two complications running on a real watch face.
+
+**Still not verified:** the light theme, and — because both need a prayer to pass while someone is
+watching — a redraw alarm firing exactly at an Adhan, and a complication gauge sweeping through one.
+See [STATUS.md](STATUS.md).
 
 ## Documents
 
@@ -255,4 +286,12 @@ in [docs/DATA_SAFETY.md](docs/DATA_SAFETY.md).
 ## License
 
 Free for personal, educational, and other non-commercial use — see [LICENSE](LICENSE) for the
-full terms. Commercial use requires separate written permission from the copyright holder.
+full terms. Commercial use requires separate written permission from the copyright holder. Note this
+is **not** an open-source licence, so the project should not be described as one.
+
+Third-party components keep their own licences, reproduced in
+[THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt). That file is compiled into both APKs as a raw
+resource and shown in the phone app under **Settings → About → Open source licences**, because MIT
+requires its notice to accompany every copy of the software and Apache 2.0 §4(a) requires shipping
+the licence itself — a link, or a file only in this repository, satisfies neither. Prayer time
+calculation uses [Adhan](https://github.com/batoulapps/adhan-kotlin), MIT, © 2016 Batoul Apps.
