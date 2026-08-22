@@ -281,16 +281,62 @@ Where configuration happens and the day is reviewed.
 **Today** — live clock, Gregorian and Hijri dates, the day arc, the next prayer with a live
 countdown, and the full schedule with passed prayers dimmed and the next one highlighted.
 
+Any date within a month either way can be browsed, by stepping a day at a time or by picking from a
+month grid. On a date other than today the live elements are omitted rather than frozen: a countdown
+to a prayer three weeks out is noise, and dimming "passed" prayers on a future day would be false.
+What remains is a timetable, which is what browsing to a date is asking for. The cache retains a
+month of history so those days show the times that were actually published rather than a fresh
+estimate of them.
+
 **Settings** — prayer time source and mosque, location, appearance, language, method, school,
 twilight (when relevant), Iqama source and offsets, per-prayer corrections.
+
+### Home screen widget
+
+The five prayers and sunrise with their Adhan and Iqama times, headed by the next Adhan or Iqama
+counting down. It follows the same cycle as complication (e): after an Adhan the countdown turns to
+that prayer's own Iqama, and only once that passes does the next prayer take over. Sunrise is listed
+but never counted down to. Tapping it opens the app.
+
+The countdown resolves the seconds rule differently from the watch, and deliberately. A widget
+cannot redraw once a minute — the platform floor for periodic updates is thirty minutes, and
+anything finer means waking the app on a timer, which this project does not do. So outside the
+seconds window it shows the target's **clock time**, which cannot go stale because it does not
+change; inside the window a `Chronometer` counts down in `mm:ss`, ticked by the system rather than
+by this app. The thresholds are the same fifteen and ten minutes used everywhere else.
+
+Transitions are driven by a single inexact alarm armed for the one instant the current rendering
+stops being true. Exact alarms are not requested: `SCHEDULE_EXACT_ALARM` is not granted by default
+from API 33, and `USE_EXACT_ALARM` is restricted by Play policy to alarm and calendar apps.
+Lateness is bounded and visible rather than corrupting: a `Chronometer` past its base counts back
+*up* from zero, so an alarm that fires late reads as a countdown that has bounced off zero, not as a
+wrong time. The next redraw corrects it.
+
+The widget follows the system light/dark setting rather than the in-app theme preference. It is
+drawn by the launcher, which has no access to the app's own setting.
 
 ---
 
 ## Languages and appearance
 
-English and Arabic throughout — every screen and every complication, with layout direction following
-the language. The phone offers light, dark, or follow-system; the watch is always dark, because on
-an AMOLED panel a black pixel is an unlit pixel.
+English and Arabic throughout — every screen, the widget, and every complication, with layout
+direction following the language. The phone offers light, dark, or follow-system; the watch is
+always dark, because on an AMOLED panel a black pixel is an unlit pixel.
+
+**Numerals are always European**, in both languages. Arabic's default CLDR numbering system is
+`arab`, so an `ar` locale can render times and countdowns as ٥:٤٥. The monospace face this app sets
+its times in carries no Arabic-Indic glyphs, so such digits fall back to the system Arabic face —
+optically larger at the same size, and proportional rather than tabular, which breaks the one
+typographic rule the design actually has: that a column of times lines up.
+
+Scope of what was measured, since it decides how much to trust this: `String.format("%d")` does emit
+Arabic-Indic digits under `ar`, so every countdown was affected. `DateTimeFormatter` did not, on the
+JDK — but Android's CLDR data differs and was not checked on a device, so the formatters are pinned
+too and the result no longer depends on which platform resolves it. Month names, weekday names and
+the AM/PM markers are unaffected either way: those come from the language, not the numbering system.
+
+Arabic also drops the scale's letter-spacing to zero. Arabic is a joined script, and tracking pulls
+the glyphs apart at the seams so a word stops reading as one word.
 
 The design should read as a considered Islamic utility rather than a generic Android demo: clean
 typography, subtle Islamic visual language, minimal animation, high readability, large touch

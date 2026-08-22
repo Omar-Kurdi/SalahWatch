@@ -148,8 +148,16 @@ public class PrayerSyncer(
          */
         public const val MINIMUM_HORIZON_DAYS: Long = 60
 
-        /** Yesterday is kept so a late Isha Iqama crossing midnight is still resolvable. */
-        public const val RETAIN_PAST_DAYS: Long = 2
+        /**
+         * How much history survives a prune.
+         *
+         * Two days would be enough for correctness alone — yesterday is needed so a late Isha
+         * Iqama crossing midnight is still resolvable. It is a month because the phone's date
+         * picker browses that far back, and a pruned day is silently recalculated on read: the
+         * user would be shown a fresh astronomical estimate of a day whose real, published times
+         * we already had. Keeping them costs one row per day.
+         */
+        public const val RETAIN_PAST_DAYS: Long = 35
 
         private const val TAG = "PrayerSyncer"
     }

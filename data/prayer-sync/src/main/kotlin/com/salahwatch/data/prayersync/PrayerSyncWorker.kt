@@ -1,6 +1,7 @@
 package com.salahwatch.data.prayersync
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -46,6 +47,7 @@ public class PrayerSyncWorker(
         return when (val result = syncer.sync(force = inputData.getBoolean(KEY_FORCE, false))) {
             is SyncResult.Fetched -> {
                 Log.i(TAG, "Cached ${result.days} days for ${result.years}")
+                announceNewTimes()
                 Result.success()
             }
 
@@ -59,7 +61,27 @@ public class PrayerSyncWorker(
         }
     }
 
+    /**
+     * Tells the rest of the app that the cache now holds different times.
+     *
+     * Sent only when a fetch actually changed something. The phone widget is the reason this
+     * exists: it is drawn by the launcher and observes nothing, so a sync landing while the app is
+     * closed would otherwise leave it showing the previous source\'s times until its next scheduled
+     * redraw — which, mid-afternoon, can be hours away.
+     *
+     * Package-scoped rather than implicit, because an implicit broadcast would not reach a
+     * manifest-declared receiver at all from API 26 onwards.
+     */
+    private fun announceNewTimes() {
+        applicationContext.sendBroadcast(
+            Intent(ACTION_TIMES_CHANGED).setPackage(applicationContext.packageName),
+        )
+    }
+
     public companion object {
+        /** Broadcast when a sync has replaced the cached times. See [announceNewTimes]. */
+        public const val ACTION_TIMES_CHANGED: String = "com.salahwatch.data.prayersync.TIMES_CHANGED"
+
         private const val TAG = "PrayerSyncWorker"
         private const val KEY_FORCE = "force"
 

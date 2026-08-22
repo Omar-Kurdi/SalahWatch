@@ -104,3 +104,18 @@ apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk
 
 If the subject reads `CN=Android Debug` the build is **not submittable**. That is the current state;
 see blocker 1 in [PLAY_STORE.md](PLAY_STORE.md).
+
+---
+
+## The home screen widget
+
+`SalahWatch` also installs a phone home screen widget, listed as "Prayer times". It shows the day's
+five prayers plus sunrise and counts down to the next Adhan or Iqama.
+
+It requests no permission of its own beyond `RECEIVE_BOOT_COMPLETED`, which exists solely so it can
+re-arm its own redraw alarm after a restart — alarms do not survive a reboot, and without it a placed
+widget would silently freeze on the previous day's times. It reads the same locally cached prayer
+times the app already holds and performs no network access of its own.
+
+Note that it does **not** request `SCHEDULE_EXACT_ALARM` or `USE_EXACT_ALARM`. Its redraw alarms are
+inexact by design.

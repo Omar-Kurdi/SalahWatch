@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,15 +43,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlinx.coroutines.delay
-
-private val TIME_FORMAT: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault())
-private val DATE_FORMAT: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("EEE d MMM", Locale.getDefault())
-private val HIJRI_FORMAT: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
 
 /**
  * The watch app, opened by tapping any complication.
@@ -158,7 +152,7 @@ private fun NextPrayer(next: PrayerOccurrence, now: Instant) {
             color = WearColors.InkMuted,
         )
         Text(
-            text = TIME_FORMAT.format(next.adhan.atZone(next.zone)),
+            text = watchFormats().time.format(next.adhan.atZone(next.zone)),
             style = MaterialTheme.typography.displayMedium,
             fontFamily = FontFamily.Monospace,
             color = WearColors.Brass,
@@ -171,7 +165,7 @@ private fun NextPrayer(next: PrayerOccurrence, now: Instant) {
         next.iqama?.let {
             Text(
                 text = "${stringResource(R.string.label_iqama)} " +
-                    TIME_FORMAT.format(it.atZone(next.zone)),
+                    watchFormats().time.format(it.atZone(next.zone)),
                 style = MaterialTheme.typography.bodySmall,
                 color = WearColors.InkFaint,
             )
@@ -183,14 +177,15 @@ private fun NextPrayer(next: PrayerOccurrence, now: Instant) {
 @Composable
 private fun DateLine(next: PrayerOccurrence) {
     val local = next.adhan.atZone(next.zone)
+    val formats = watchFormats()
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = DATE_FORMAT.format(local),
+            text = formats.date.format(local),
             style = MaterialTheme.typography.labelSmall,
             color = WearColors.InkFaint,
         )
         Text(
-            text = HIJRI_FORMAT.format(HijrahDate.from(LocalDate.from(local))),
+            text = formats.hijri.format(HijrahDate.from(LocalDate.from(local))),
             style = MaterialTheme.typography.labelSmall,
             color = WearColors.InkFaint,
         )
@@ -211,7 +206,7 @@ private fun ScheduleRow(occurrence: PrayerOccurrence, isNext: Boolean) {
             color = if (isNext) WearColors.Brass else WearColors.InkMuted,
         )
         Text(
-            text = TIME_FORMAT.format(occurrence.adhan.atZone(occurrence.zone)),
+            text = watchFormats().time.format(occurrence.adhan.atZone(occurrence.zone)),
             style = MaterialTheme.typography.bodySmall,
             fontFamily = FontFamily.Monospace,
             color = if (isNext) WearColors.Brass else WearColors.Ink,
@@ -236,10 +231,10 @@ private fun remainingUntil(target: Instant, now: Instant): String {
     val seconds = (duration.seconds % SECONDS_PER_MINUTE).toInt()
 
     return when {
-        hours > 0 -> stringResource(R.string.remaining_hours, hours.toInt(), minutes)
-        duration > SECONDS_THRESHOLD -> stringResource(R.string.remaining_minutes, minutes)
-        minutes > 0 -> stringResource(R.string.remaining_minutes_seconds, minutes, seconds)
-        else -> stringResource(R.string.remaining_seconds, seconds)
+        hours > 0 -> numericStringResource(R.string.remaining_hours, hours.toInt(), minutes)
+        duration > SECONDS_THRESHOLD -> numericStringResource(R.string.remaining_minutes, minutes)
+        minutes > 0 -> numericStringResource(R.string.remaining_minutes_seconds, minutes, seconds)
+        else -> numericStringResource(R.string.remaining_seconds, seconds)
     }
 }
 

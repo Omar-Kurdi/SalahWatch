@@ -86,4 +86,12 @@
     <string name="label_ends">Ends</string>
     <string name="label_since">Since</string>
     <string name="label_estimated">estimated</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_previous_day">Previous day</string>
+    <string name="action_next_day">Next day</string>
+    <string name="date_today">Today</string>
+    <string name="date_yesterday">Yesterday</string>
+    <string name="date_tomorrow">Tomorrow</string>
+    <string name="widget_label">Prayer times</string>
+    <string name="widget_description">Today\'s prayer times, with the next Adhan or Iqama counting down.</string>
 </resources>

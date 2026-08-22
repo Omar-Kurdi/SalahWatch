@@ -243,7 +243,7 @@ class PrayerSyncerTest {
         val repo = FakeRepository()
         syncer(FakeClient(), repo, FakeSyncState(), prefs(alAin)).sync()
 
-        assertEquals(today.minusDays(2), repo.prunedBefore)
+        assertEquals(today.minusDays(PrayerSyncer.RETAIN_PAST_DAYS), repo.prunedBefore)
         assertTrue(
             repo.stored.containsKey(today.minusDays(1)),
             "Yesterday is needed for an Isha Iqama that crosses midnight",

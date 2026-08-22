@@ -13,6 +13,7 @@ import com.salahwatch.core.model.ScheduleSource
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -163,5 +164,15 @@ internal object ComplicationTexts {
 
     fun format(instant: Instant, zone: ZoneId): String = TIME_FORMAT.format(instant.atZone(zone))
 
-    private val TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mm")
+    /**
+     * Pinned to European digits, not left to the default locale.
+     *
+     * A complication\'s SHORT_TEXT budget is seven characters and its face is chosen by the watch
+     * face, not by this app. Arabic-Indic digits would fall back to a face the watch face never
+     * sized for, so a time that fits becomes one that is clipped.
+     */
+    private val TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern(
+        "h:mm",
+        Locale.Builder().setLocale(Locale.getDefault()).setUnicodeLocaleKeyword("nu", "latn").build(),
+    )
 }

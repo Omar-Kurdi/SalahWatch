@@ -6,7 +6,7 @@ Glance at your watch face and see the next prayer, when the Adhan is called, whe
 starts, and how long you have. Five separate complication providers mean you can fill several slots
 on one watch face independently.
 
-> **Status:** building and installing, 117 unit tests passing, lint clean. Several paths are built
+> **Status:** building and installing, 211 unit tests passing, lint clean. Several paths are built
 > and unit-tested but have not yet been exercised on hardware. **[STATUS.md](STATUS.md)** lists what
 > is verified, what is not, and what remains before release.
 
@@ -32,7 +32,15 @@ calendars and the day's schedule.
 
 The phone app shows a live clock, the Gregorian and Hijri date, the day arc, the next prayer with
 time remaining, and the full schedule with passed prayers dimmed. Hijri dates come from `java.time`'s
-Umm al-Qura calendar — no API call, and it cannot drift out of step with the prayer times.
+Umm al-Qura calendar — no API call, and it cannot drift out of step with the prayer times. Any date
+within a month either way can be browsed, by stepping a day at a time or by picking from a month
+grid.
+
+A **home screen widget** shows the five prayers and sunrise with their Adhan and Iqama times, headed
+by the next Adhan or Iqama counting down — the same Adhan → Iqama → next-prayer cycle the watch
+uses. Outside the seconds window it shows the target\'s clock time; inside it, a `Chronometer` the
+system ticks. Either way this app is not running: see
+[the note on not waking up](#the-app-does-not-wake-up-to-tick-a-clock).
 
 ### A note on what complications can and cannot do
 
@@ -188,7 +196,7 @@ empty state.
 
 ```
 build-logic/       convention plugins (included build, not buildSrc)
-app/               phone: today's schedule, settings, location
+app/               phone: today's schedule, date browsing, settings, location, home widget
 wear/              watch app + 5 complication services
 core/model         domain types — pure JVM
 core/calculation   PrayerCalendar, phase engine, adhan2 wrapper — pure JVM
@@ -205,10 +213,11 @@ timezone, DST and midnight-rollover logic is unit-testable without an emulator.
 
 ## Verification status
 
-**Done:** 117 unit tests passing, detekt clean, all four APKs build. Covered by tests: DST
+**Done:** 211 unit tests passing, detekt clean, lint clean, all four APKs build. Covered by tests: DST
 transitions in both directions, timezone travel, Isha Iqama crossing midnight, the year boundary,
 cache invalidation on moving or changing method, GPS jitter tolerance, Data Layer payload limits,
 mosque calendar validation, corrections applied on read, both forms a mosque publishes its Iqama in,
+the widget's Adhan → Iqama → next-prayer cycle and the instants at which it re-renders,
 that a phase timeline is contiguous with no instant uncovered, and that a countdown's gauge measures
 the whole wait rather than resetting when the text switches to seconds.
 

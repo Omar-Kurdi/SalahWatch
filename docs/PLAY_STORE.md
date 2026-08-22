@@ -109,6 +109,13 @@ on nothing but where and when you are, which makes it computable exactly — and
 usable to check whether the rest of a mosque's published data lines up. A calendar that
 fails falls back to calculation rather than showing you something confidently wrong.
 
+ON YOUR PHONE TOO
+
+A home screen widget shows all five prayers and sunrise with their Adhan and Iqama
+times, headed by the next one counting down — and it counts down without the app running
+at all. Browse any day within a month either way to check a time in advance, or look back
+at one.
+
 WORKS WITHOUT YOUR PHONE
 
 A whole year of times is fetched at once and kept on the watch. After one sync the watch
@@ -127,6 +134,8 @@ ALSO
 • Iqama from your own offsets, or from the mosque's published times
 • Per-prayer corrections, in minutes, against your local timetable
 • Gregorian and Hijri dates, from the Umm al-Qura calendar
+• A home screen widget for the phone
+• Any date within a month either way, by day or from a month grid
 • Full Arabic, including right-to-left layout
 • Light and dark themes on the phone; the watch is always dark, because an unlit pixel
   costs no battery on an AMOLED display
@@ -141,9 +150,9 @@ sent to the prayer-time services only to work out prayer times for where you are
 ### Promotional text / release notes (500 characters max)
 
 ```
-First release. Five Wear OS complications, prayer times from calculation or from a
-nearby mosque's own published timetable, a full year cached for offline use, English and
-Arabic.
+First release. Five Wear OS complications, a home screen widget for the phone, prayer
+times from calculation or from a nearby mosque's own published timetable, a full year
+cached for offline use, English and Arabic.
 ```
 
 ---
@@ -180,6 +189,10 @@ phone's.
 - [ ] Data safety form completed from [DATA_SAFETY.md](DATA_SAFETY.md)
 - [ ] Content rating questionnaire completed
 - [ ] Phone and Wear screenshots captured per [SCREENSHOT_PLAN.md](SCREENSHOT_PLAN.md)
+- [ ] Widget placed on a real home screen and watched across an Adhan and its Iqama — the
+      `Chronometer` counting down rather than up, and the alarm firing close to the boundary
+- [ ] Arabic checked by eye on a real screen: numerals European, times still in a straight
+      column, prayer names no longer letter-spaced apart
 - [ ] Reviewer notes pasted from [REVIEW_INSTRUCTIONS.md](REVIEW_INSTRUCTIONS.md)
 - [ ] Both APKs verified with `aapt2 dump badging` after the signing change — check the artifact, not the build result
 - [ ] Internal testing track exercised on a real phone and a real watch first

@@ -153,7 +153,7 @@ private fun ArcLabels(prayers: List<PrayerOccurrence>, fractionOf: (Instant) -> 
             modifier = Modifier.weight(1f),
         )
         androidx.compose.material3.Text(
-            text = androidx.compose.ui.res.stringResource(
+            text = com.salahwatch.app.numericStringResource(
                 com.salahwatch.app.R.string.day_progress,
                 (fractionOf(java.time.Instant.now()) * PERCENT).roundToInt(),
             ),

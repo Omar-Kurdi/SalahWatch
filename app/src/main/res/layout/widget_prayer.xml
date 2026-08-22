@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The home screen widget.
+
+    Every view here is one RemoteViews can inflate — no ConstraintLayout, no custom views, and no
+    plain `View` (which is not on the allowed list, hence the TextView used as a divider). The six
+    rows are written out rather than generated because RemoteViews has no way to add children at
+    runtime without a collection adapter, and six fixed slots is far less machinery than a
+    RemoteViewsService for a list whose length never changes.
+
+    The hardcoded times are placeholders, and they earn their keep: this layout is also the
+    `previewLayout` shown in the widget picker, which inflates it without ever running the binder.
+    Left blank, the picker would advertise the widget as an empty rounded rectangle. Every one of
+    them is overwritten by WidgetViews before the widget is visible on a home screen.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="12dp">
+
+    <!-- Header: which day, and where these times are for. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <TextView
+            android:id="@+id/widget_date"
+            android:text="@string/widget_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:textColor="@color/widget_ink_muted"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/widget_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/widget_ink_faint"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+    <!-- The countdown. Exactly one of the two time views is ever visible. -->
+    <LinearLayout
+        android:id="@+id/widget_headline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_headline_label"
+                android:text="@string/label_adhan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.12"
+                android:textColor="@color/widget_ink_faint"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/widget_headline_prayer"
+                android:text="@string/prayer_asr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_countdown_clock"
+            android:text="3:49 PM"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="26sp"
+            android:fontFamily="monospace"
+            android:textColor="@color/widget_accent"
+            android:maxLines="1" />
+
+        <Chronometer
+            android:id="@+id/widget_countdown_ticker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="26sp"
+            android:fontFamily="monospace"
+            android:textColor="@color/widget_accent"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <!-- A TextView, because `View` is not a RemoteViews-allowed class. -->
+    <TextView
+        android:id="@+id/widget_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/widget_line" />
+
+    <LinearLayout
+        android:id="@+id/widget_rows"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="4dp">
+
+        <LinearLayout
+            android:id="@+id/row_0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/row_0_name"
+                android:text="Fajr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/row_0_adhan"
+                android:text="4:35 AM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/row_0_iqama"
+                android:text="4:55 AM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/row_1_name"
+                android:text="Sunrise"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/row_1_adhan"
+                android:text="5:55 AM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/row_1_iqama"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/row_2_name"
+                android:text="Dhuhr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/row_2_adhan"
+                android:text="12:24 PM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/row_2_iqama"
+                android:text="12:44 PM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/row_3_name"
+                android:text="Asr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/row_3_adhan"
+                android:text="3:49 PM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/row_3_iqama"
+                android:text="4:09 PM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/row_4_name"
+                android:text="Maghrib"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/row_4_adhan"
+                android:text="6:48 PM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/row_4_iqama"
+                android:text="6:56 PM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/row_5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/row_5_name"
+                android:text="Isha"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/row_5_adhan"
+                android:text="8:18 PM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/row_5_iqama"
+                android:text="8:38 PM"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="72dp"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:fontFamily="monospace"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_notice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:textSize="11sp"
+        android:textColor="@color/widget_ink_faint"
+        android:visibility="gone" />
+
+    <!-- Shown instead of everything above when there is no location yet. -->
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:gravity="center"
+        android:textSize="14sp"
+        android:textColor="@color/widget_ink_muted"
+        android:visibility="gone" />
+</LinearLayout>

@@ -8,6 +8,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalConfiguration
 import com.salahwatch.core.model.ThemeMode
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -42,7 +43,7 @@ internal val PrayerColorScheme = darkColorScheme(
  * Labels are uppercase with wide tracking; the eye reads them as structure, not as content, which
  * lets the times stay the loudest thing on screen.
  */
-internal val PrayerTypography = Typography(
+private val PrayerTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Light,
@@ -76,6 +77,42 @@ internal val PrayerTypography = Typography(
     ),
     labelSmall = TextStyle(fontWeight = FontWeight.Medium, fontSize = 10.sp, letterSpacing = 1.5.sp),
 )
+
+/**
+ * The same scale, adjusted for Arabic.
+ *
+ * Two changes, and only two, because only two are actually defects rather than taste.
+ *
+ * **Tracking goes to zero.** Latin type takes letter-spacing well and this scale leans on it —
+ * four points on a prayer name, two on a section label. Arabic is a joined script: spacing its
+ * letters pulls the glyphs apart at the seams, so a word stops reading as one word. That is not a
+ * stylistic preference; the tracking is doing damage.
+ *
+ * **The prayer name comes down a step.** Arabic sits optically larger than Latin at the same `sp` —
+ * it carries more ink above and below the baseline — so a scale tuned against Latin reads a size too
+ * big once translated. `headlineSmall` is the one that shows it worst, being both the largest run of
+ * Arabic words on screen and the most heavily tracked.
+ *
+ * Nothing else changes size. The label styles are already at 10 and 11 `sp`, which is as small as
+ * Arabic stays legible; removing their tracking tightens them without shrinking them. And the
+ * display sizes are left exactly where they are — they show times, those times are now pinned to
+ * European digits by [com.salahwatch.app.withLatinDigits], and shrinking them would be correcting
+ * for a problem that was already fixed at its source.
+ */
+private val ArabicTypography = PrayerTypography.copy(
+    headlineSmall = PrayerTypography.headlineSmall.copy(
+        fontSize = 18.sp,
+        letterSpacing = 0.sp,
+    ),
+    displayLarge = PrayerTypography.displayLarge.copy(letterSpacing = 0.sp),
+    displayMedium = PrayerTypography.displayMedium.copy(letterSpacing = 0.sp),
+    labelLarge = PrayerTypography.labelLarge.copy(letterSpacing = 0.sp),
+    labelMedium = PrayerTypography.labelMedium.copy(letterSpacing = 0.sp),
+    labelSmall = PrayerTypography.labelSmall.copy(letterSpacing = 0.sp),
+)
+
+/** Arabic and no other language: this is about the script, not about the region. */
+private const val ARABIC = "ar"
 
 /** Times, everywhere they appear. Tabular so columns of figures line up. */
 internal val TimeStyle = TextStyle(
@@ -154,10 +191,15 @@ internal fun PrayerTheme(mode: ThemeMode, content: @Composable () -> Unit) {
     }
     val palette = if (dark) NightPalette else DayPalette
 
+    // Read from the configuration rather than from Locale.getDefault(): the language override
+    // resolves against the activity's context, and this has to change with it.
+    val language = LocalConfiguration.current.locales[0].language
+    val typography = if (language == ARABIC) ArabicTypography else PrayerTypography
+
     CompositionLocalProvider(LocalPalette provides palette) {
         MaterialTheme(
             colorScheme = if (dark) PrayerColorScheme else PrayerLightColorScheme,
-            typography = PrayerTypography,
+            typography = typography,
             content = content,
         )
     }

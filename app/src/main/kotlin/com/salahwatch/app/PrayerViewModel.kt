@@ -10,6 +10,7 @@ import com.salahwatch.core.model.AppLanguage
 import com.salahwatch.core.preferences.PreferencesRepository
 import com.salahwatch.core.preferences.UserPreferences
 import com.salahwatch.core.preferences.languageChanges
+import com.salahwatch.app.widget.PrayerWidgetProvider
 import com.salahwatch.data.location.DeviceLocationProvider
 import com.salahwatch.data.location.PlaceLookup
 import com.salahwatch.data.prayersync.MawaqitClient
@@ -35,10 +36,27 @@ public sealed interface HomeState {
     public data object NeedsLocation : HomeState
 
     public data class Ready(
-        val today: List<PrayerOccurrence>,
+        /** The day being shown, which is not necessarily today. */
+        val date: LocalDate,
+        val prayers: List<PrayerOccurrence>,
+        /**
+         * The next prayer from now, always relative to the real today.
+         *
+         * Kept even while another date is shown so the caller keeps a zone to format with, but
+         * only rendered as a countdown when [isToday].
+         */
         val next: PrayerOccurrence?,
         val locationLabel: String?,
         val isEstimated: Boolean,
+        /**
+         * Whether [date] was today *when this state was built*.
+         *
+         * Resolved once rather than computed from `LocalDate.now()` on each read. A getter flips at
+         * midnight while [date] does not, so an app left open overnight would drop the clock, the
+         * day arc and the next-prayer panel while the date strip still read "Today" — a screen
+         * contradicting itself. This is the same trap `scheduleChanges()` was rewritten to avoid.
+         */
+        val isToday: Boolean,
     ) : HomeState
 }
 
@@ -61,6 +79,11 @@ public class PrayerViewModel(application: Application) : AndroidViewModel(applic
     private val publisher = PrayerDataLayerPublisher(application)
 
     private val refreshTrigger = MutableStateFlow(0)
+
+    private val _selectedDate = MutableStateFlow(LocalDate.now())
+
+    /** The day the Today screen is showing. Defaults to today and returns there on [refresh]. */
+    public val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
     private val _home = MutableStateFlow<HomeState>(HomeState.Loading)
     public val home: StateFlow<HomeState> = _home.asStateFlow()
@@ -89,13 +112,14 @@ public class PrayerViewModel(application: Application) : AndroidViewModel(applic
                 preferences.preferences,
                 refreshTrigger,
                 repository.scheduleChanges(),
-            ) { prefs, _, _ -> prefs }
-                .collect { prefs -> loadHome(prefs) }
+                _selectedDate,
+            ) { prefs, _, _, date -> prefs to date }
+                .collect { (prefs, date) -> loadHome(prefs, date) }
         }
         PrayerSyncScheduler.ensureScheduled(application)
     }
 
-    private suspend fun loadHome(prefs: UserPreferences) {
+    private suspend fun loadHome(prefs: UserPreferences, selected: LocalDate) {
         val location = prefs.location.effectiveLocation
         if (location == null) {
             _home.value = HomeState.NeedsLocation
@@ -103,18 +127,48 @@ public class PrayerViewModel(application: Application) : AndroidViewModel(applic
         }
 
         val today = LocalDate.now()
-        val calendar = repository.timelineCalendar(today)
-        val next = calendar.nextPrayer(Instant.now())
-        val todaysPrayers = calendar.occurrences.filter { it.date == today }
+
+        // Two calendars, deliberately. "What is next" is always a question about *now*, and only
+        // the timeline calendar can answer it across midnight — it starts a day early so a late
+        // Isha still resolves. The day being browsed is a separate, narrower question, and asking
+        // the timeline for a date a month out would filter to nothing.
+        val timeline = repository.timelineCalendar(today)
+        val next = timeline.nextPrayer(Instant.now())
+        val browsed = if (selected == today) timeline else repository.calendar(selected, 1)
+        val prayers = browsed.occurrences.filter { it.date == selected }
 
         _home.value = HomeState.Ready(
-            today = todaysPrayers,
+            date = selected,
+            isToday = selected == today,
+            prayers = prayers,
             next = next,
             locationLabel = location.label,
-            isEstimated = todaysPrayers.any { it.source.isEstimate },
+            isEstimated = prayers.any { it.source.isEstimate },
         )
 
-        publish(prefs)
+        // Only when today is on screen. Browsing to another date must not cost a Data Layer push
+        // to the watch on every arrow tap — the watch always wants today, whatever the phone shows.
+        // Both of these are for today and only today. The widget always shows today, so browsing
+        // to another date can never change what it displays — and without the gate, stepping back
+        // a month would fire thirty broadcasts, each one a database read and an alarm re-arm.
+        if (selected == today) {
+            publish(prefs)
+
+            // The widget reads the same cache but observes nothing, so a settings change made here
+            // — an Iqama offset, a correction — would not reach it until its next scheduled redraw.
+            PrayerWidgetProvider.refresh(getApplication())
+        }
+    }
+
+    /** Shows [date], clamped to the range the picker offers. */
+    public fun selectDate(date: LocalDate) {
+        val today = LocalDate.now()
+        _selectedDate.value = date.coerceIn(today.minusMonths(BROWSE_MONTHS), today.plusMonths(BROWSE_MONTHS))
+    }
+
+    /** Steps one day either way. [days] is signed. */
+    public fun stepDate(days: Long) {
+        selectDate(_selectedDate.value.plusDays(days))
     }
 
     /** Pushes the current schedule to the watch. Silent when no watch is paired. */
@@ -141,6 +195,8 @@ public class PrayerViewModel(application: Application) : AndroidViewModel(applic
     }
 
     public fun refresh() {
+        // Refreshing is "show me where I am now", so it also returns from any browsed date.
+        _selectedDate.value = LocalDate.now()
         refreshTrigger.value += 1
         PrayerSyncScheduler.syncNow(getApplication())
     }
@@ -163,10 +219,19 @@ public class PrayerViewModel(application: Application) : AndroidViewModel(applic
         val canLookUpCities: Boolean,
     )
 
-    private companion object {
-        const val STOP_TIMEOUT_MS = 5_000L
+    public companion object {
+        /**
+         * How far either way the date picker reaches.
+         *
+         * Past days come from the cache — [com.salahwatch.data.prayersync.PrayerSyncer] retains at
+         * least this much history so browsing back shows the times that were actually published,
+         * not a fresh estimate of them.
+         */
+        public const val BROWSE_MONTHS: Long = 1
+
+        private const val STOP_TIMEOUT_MS = 5_000L
 
         /** Days pushed to the watch. Matches the publisher's own cap. */
-        const val PUBLISH_DAYS = PrayerDataLayerPublisher.MAX_SYNC_DAYS
+        private const val PUBLISH_DAYS = PrayerDataLayerPublisher.MAX_SYNC_DAYS
     }
 }

@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,35 +35,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.chrono.HijrahDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-
-private const val TIME_PATTERN = "h:mm a"
-private const val CLOCK_PATTERN = "h:mm:ss a"
-private const val GREGORIAN_PATTERN = "EEEE d MMMM yyyy"
-private const val HIJRI_PATTERN = "d MMMM yyyy"
-
-/**
- * Formatters bound to the language the app is currently showing.
- *
- * Resolved from the context rather than from `Locale.getDefault()` at class-load time. Top-level
- * formatter constants are initialised once per process, so after switching to Arabic and recreating
- * the activity they would still be printing the previous language's month names and AM/PM markers
- * next to labels that had all changed.
- */
-private class Formats(locale: Locale) {
-    val time: DateTimeFormatter = DateTimeFormatter.ofPattern(TIME_PATTERN, locale)
-    val clock: DateTimeFormatter = DateTimeFormatter.ofPattern(CLOCK_PATTERN, locale)
-    val gregorian: DateTimeFormatter = DateTimeFormatter.ofPattern(GREGORIAN_PATTERN, locale)
-    val hijri: DateTimeFormatter = DateTimeFormatter.ofPattern(HIJRI_PATTERN, locale)
-    val locale: Locale = locale
-}
-
-@Composable
-private fun formats(): Formats {
-    val locale = LocalConfiguration.current.locales[0]
-    return remember(locale) { Formats(locale) }
-}
 
 /**
  * Today: where you are in the day, what is next, and the full schedule.
@@ -75,7 +45,12 @@ private fun formats(): Formats {
  * reference rather than headline.
  */
 @Composable
-internal fun TodayScreen(state: HomeState, now: Instant, onRefresh: () -> Unit) {
+internal fun TodayScreen(
+    state: HomeState,
+    now: Instant,
+    onRefresh: () -> Unit,
+    onSelectDate: (LocalDate) -> Unit,
+) {
     when (state) {
         HomeState.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             CircularProgressIndicator(color = LocalPalette.current.brass)
@@ -83,7 +58,7 @@ internal fun TodayScreen(state: HomeState, now: Instant, onRefresh: () -> Unit) 
 
         HomeState.NeedsLocation -> EmptyState()
 
-        is HomeState.Ready -> ReadyContent(state, now, onRefresh)
+        is HomeState.Ready -> ReadyContent(state, now, onRefresh, onSelectDate)
     }
 }
 
@@ -110,32 +85,49 @@ private fun EmptyState() {
     }
 }
 
+/**
+ * Two shapes of screen, sharing one list.
+ *
+ * On today, everything is live: the clock ticks, the arc fills, the next prayer counts down and the
+ * prayers behind you are dimmed. On any other date none of that is true — a countdown to a Fajr
+ * three weeks out is noise, and dimming "passed" prayers on a future day would be a lie. So those
+ * pieces are omitted rather than frozen, and what remains is a timetable, which is exactly what is
+ * being asked for when someone browses to a date.
+ */
 @Composable
-private fun ReadyContent(state: HomeState.Ready, now: Instant, onRefresh: () -> Unit) {
-    val zone = state.next?.zone ?: ZoneId.systemDefault()
+private fun ReadyContent(
+    state: HomeState.Ready,
+    now: Instant,
+    onRefresh: () -> Unit,
+    onSelectDate: (LocalDate) -> Unit,
+) {
+    val zone = state.prayers.firstOrNull()?.zone ?: state.next?.zone ?: ZoneId.systemDefault()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        item { ClockHeader(now, zone, state.locationLabel) }
+        item { ClockHeader(state.date, now, zone, state.isToday, state.locationLabel) }
 
-        if (state.today.size >= 2) {
-            item { DayArc(prayers = state.today, now = now) }
+        item { DateSelector(date = state.date, onSelect = onSelectDate) }
+
+        if (state.isToday) {
+            if (state.prayers.size >= 2) {
+                item { DayArc(prayers = state.prayers, now = now) }
+            }
+            state.next?.let { item { NextPrayerPanel(it, now) } }
         }
-
-        state.next?.let { item { NextPrayerPanel(it, now) } }
 
         item { ScheduleHeader(onRefresh) }
 
-        items(state.today) { occurrence ->
+        items(state.prayers) { occurrence ->
             PrayerRow(
                 occurrence = occurrence,
-                isNext = state.next?.let {
+                isNext = state.isToday && state.next?.let {
                     it.prayer == occurrence.prayer && it.adhan == occurrence.adhan
                 } == true,
-                hasPassed = occurrence.adhan < now,
+                hasPassed = state.isToday && occurrence.adhan < now,
             )
         }
 
@@ -154,21 +146,31 @@ private fun ReadyContent(state: HomeState.Ready, now: Instant, onRefresh: () -> 
  * month names appear as the calendar's own rather than transliterated.
  */
 @Composable
-private fun ClockHeader(now: Instant, zone: ZoneId, locationLabel: String?) {
+private fun ClockHeader(
+    date: LocalDate,
+    now: Instant,
+    zone: ZoneId,
+    isToday: Boolean,
+    locationLabel: String?,
+) {
     val palette = LocalPalette.current
     val formats = formats()
     val local = now.atZone(zone)
-    val hijri = HijrahDate.from(LocalDate.from(local))
+    // Both calendars describe the day on screen. The clock only ever describes now, so on another
+    // date it is dropped rather than shown against dates it does not belong to.
+    val hijri = HijrahDate.from(date)
 
     Column {
+        if (isToday) {
+            Text(
+                text = formats.clock.format(local),
+                style = MaterialTheme.typography.displayMedium,
+                color = palette.ink,
+            )
+            Spacer(Modifier.height(4.dp))
+        }
         Text(
-            text = formats.clock.format(local),
-            style = MaterialTheme.typography.displayMedium,
-            color = palette.ink,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = formats.gregorian.format(local),
+            text = formats.gregorian.format(date),
             style = MaterialTheme.typography.bodyMedium,
             color = palette.inkMuted,
         )
@@ -341,10 +343,10 @@ private fun remainingUntil(target: Instant, now: Instant): String {
     val seconds = (duration.seconds % SECONDS_PER_MINUTE).toInt()
 
     return when {
-        hours > 0 -> stringResource(R.string.remaining_hours, hours.toInt(), minutes)
-        duration > SECONDS_THRESHOLD -> stringResource(R.string.remaining_minutes, minutes)
-        minutes > 0 -> stringResource(R.string.remaining_minutes_seconds, minutes, seconds)
-        else -> stringResource(R.string.remaining_seconds, seconds)
+        hours > 0 -> numericStringResource(R.string.remaining_hours, hours.toInt(), minutes)
+        duration > SECONDS_THRESHOLD -> numericStringResource(R.string.remaining_minutes, minutes)
+        minutes > 0 -> numericStringResource(R.string.remaining_minutes_seconds, minutes, seconds)
+        else -> numericStringResource(R.string.remaining_seconds, seconds)
     }
 }
 

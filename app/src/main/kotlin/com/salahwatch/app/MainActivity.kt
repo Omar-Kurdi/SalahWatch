@@ -149,7 +149,12 @@ private fun PrayerApp(viewModel: PrayerViewModel) {
                 .padding(padding),
         ) {
             when (tab) {
-                Tab.TODAY -> TodayScreen(state = home, now = now, onRefresh = viewModel::refresh)
+                Tab.TODAY -> TodayScreen(
+                    state = home,
+                    now = now,
+                    onRefresh = viewModel::refresh,
+                    onSelectDate = viewModel::selectDate,
+                )
                 Tab.SETTINGS -> SettingsScreen(preferences = settings, viewModel = viewModel)
             }
         }

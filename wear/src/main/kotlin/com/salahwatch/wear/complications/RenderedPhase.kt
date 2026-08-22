@@ -2,6 +2,7 @@ package com.salahwatch.wear.complications
 
 import com.salahwatch.core.calculation.PhaseContent
 import com.salahwatch.core.calculation.PrayerPhase
+import com.salahwatch.core.calculation.SecondsWindow
 import com.salahwatch.core.calculation.TimeKind
 import java.time.Duration
 
@@ -73,17 +74,12 @@ internal fun List<PrayerPhase>.withCountdownGranularity(
     }
 }
 
-/** When a countdown to an Adhan starts showing seconds. */
-internal val ADHAN_SECONDS_THRESHOLD: Duration = Duration.ofMinutes(ADHAN_SECONDS_MINUTES)
-
 /**
- * When a countdown to an Iqama starts showing seconds.
+ * The thresholds themselves live in [SecondsWindow], in the shared module.
  *
- * Shorter than the Adhan's, because the whole wait is shorter. An Iqama offset at or below this —
- * the SPEC default for Maghrib is eight minutes — never reaches a minutes phase and shows `mm:ss`
- * for its entire duration, which is the intent rather than an edge case.
+ * The phone widget applies the same rule through an entirely different mechanism, so the numbers
+ * cannot sit next to the timeline code that happens to be the first consumer of them.
  */
-internal val IQAMA_SECONDS_THRESHOLD: Duration = Duration.ofMinutes(IQAMA_SECONDS_MINUTES)
+internal val ADHAN_SECONDS_THRESHOLD: Duration = SecondsWindow.ADHAN
 
-private const val ADHAN_SECONDS_MINUTES = 15L
-private const val IQAMA_SECONDS_MINUTES = 10L
+internal val IQAMA_SECONDS_THRESHOLD: Duration = SecondsWindow.IQAMA

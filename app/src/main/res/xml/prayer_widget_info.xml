@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    `updatePeriodMillis` is deliberately 0.
+
+    The platform floor for that field is thirty minutes, which is far too coarse for a countdown and
+    far too frequent for a timetable that changes six times a day. Instead the widget arms a single
+    alarm for the exact moment its own content stops being true — see PrayerWidgetProvider — and the
+    Chronometer is ticked by the system, not by this process. The result is a widget that shows
+    seconds without this app ever waking up to draw them.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/widget_prayer"
+    android:previewLayout="@layout/widget_prayer"
+    android:minWidth="250dp"
+    android:minHeight="180dp"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="110dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="4"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/widget_description"
+    android:updatePeriodMillis="0" />
