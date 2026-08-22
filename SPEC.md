@@ -325,7 +325,18 @@ so there is one layout to keep correct. Note the options bundle is empty on firs
 treated as "full size", because guessing small on a large widget looks like a defect while guessing
 large on a small one is corrected within a frame.
 
-**Strip widget.** One row, five cells by one. Five prayers across, each on four lines: an icon, its
+**Strip widget.** One row, five cells by one — and the two ways that size is declared must agree.
+`targetCellWidth`/`targetCellHeight` are honoured from API 31, while `minWidth`/`minHeight` size the
+placement before that and some launchers take the larger either way. The platform derives a span as
+`ceil((size + 30) / 70)`, so a `minHeight` set to reflect how tall the content looks will silently
+override the cell count: 90dp derives to two rows, and the widget was placed 5x2 while
+`targetCellHeight` said 1. A unit test now asserts the two agree.
+
+Vertical resizing is permitted despite the single-row design, because a launcher stores a widget's
+span when it is placed and never re-derives it on update — without a handle, a widget added while
+the declaration was wrong would stay wrong until removed and re-added.
+
+ Five prayers across, each on four lines: an icon, its
 name, its Adhan time, and how long until it.
 
 Every prayer still ahead shows a countdown; passed ones are dimmed and show none. The prayer in play

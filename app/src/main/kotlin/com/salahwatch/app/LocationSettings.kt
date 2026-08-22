@@ -30,7 +30,10 @@ import com.salahwatch.app.ui.PrayerColors
 import com.salahwatch.app.ui.RadioRow
 import com.salahwatch.app.ui.SettingsDivider
 import com.salahwatch.app.ui.SettingsSection
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.salahwatch.core.model.LocationMode
+import com.salahwatch.data.location.DeviceLocationProvider
 import com.salahwatch.core.model.effectiveLocation
 import com.salahwatch.core.preferences.UserPreferences
 import kotlinx.coroutines.launch
@@ -57,6 +60,23 @@ internal fun LocationSection(preferences: UserPreferences, viewModel: PrayerView
     var pending by remember { mutableStateOf(choice) }
     val current = preferences.location.effectiveLocation
 
+    // Choosing "use my location" is the *only* moment this app has any business asking for the
+    // permission, so it asks here rather than on launch. Without this the option silently did
+    // nothing on a fresh install: the manifest declares ACCESS_COARSE_LOCATION and the provider
+    // checks it, but nothing ever requested it, leaving the system settings screen as the only way
+    // to grant it — which no one should have to discover.
+    val requestLocation = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        if (granted) {
+            viewModel.edit.location.automatic()
+        } else {
+            // Denied. Fall back to manual rather than leaving the radio pointing at a mode that
+            // cannot work — and manual needs no permission, so it is a real answer, not a dead end.
+            pending = LocationChoice.MANUAL
+        }
+    }
+
     SettingsSection(
         title = stringResource(R.string.settings_location),
         description = current?.label ?: current?.let { "%.4f, %.4f".format(it.latitude, it.longitude) },
@@ -73,7 +93,13 @@ internal fun LocationSection(preferences: UserPreferences, viewModel: PrayerView
                 supporting = { labels.getValue(it).second },
                 onSelect = {
                     pending = it
-                    if (it == LocationChoice.AUTOMATIC) viewModel.edit.location.automatic()
+                    if (it == LocationChoice.AUTOMATIC) {
+                        if (viewModel.capabilities.canUseDeviceLocation) {
+                            viewModel.edit.location.automatic()
+                        } else {
+                            requestLocation.launch(DeviceLocationProvider.REQUIRED_PERMISSION)
+                        }
+                    }
                 },
             )
         }

@@ -12,11 +12,11 @@ building.
 
 | | State |
 |---|---|
-| Wear app + 5 complication providers | Installed on a watch; all five providers registered. **Not yet placed on a watch face** |
+| Wear app + 5 complication providers | **Verified on a real watch face** — Prayer Time and Adhan Countdown both live |
 | Watch app | **Verified on device** — next prayer, countdown, both calendars, bezel ring |
 | Phone app — Today, Settings, location | **Verified on device** |
 | Phone app — date browsing (±1 month) | **Verified on device**, arrows and month grid both |
-| Home screen widgets (schedule + strip) | Built and unit-tested; **neither yet placed on a home screen** |
+| Home screen widgets (schedule + strip) | **Verified on a home screen** — both render, the countdown ticks down |
 | Prayer times — calculation | Working, cached a year at a time |
 | Prayer times — nearby mosque | **Verified on device** — a real mosque was found and listed |
 | Phone → watch sync (Data Layer) | **Verified between two real devices** |
@@ -49,6 +49,14 @@ the user to unlock and keep them awake. Two devices means every `adb` call needs
   words rather than spaced-out letters, and the layout mirrors.
 - **The strip widget's real placement is 406dp x 96dp**, which its size tiers are now tuned
   against rather than an assumed ~70dp cell.
+- **Both widgets render on a home screen**, and the `Chronometer` counts *down* rather than up —
+  the one flag that looks identical in code either way.
+- **Two complications run on a real watch face**, showing the next prayer and its countdown.
+- **The location permission is actually requested.** It never was: the manifest declared
+  `ACCESS_COARSE_LOCATION` and the provider checked it, but nothing asked, so "use my location" did
+  nothing on a fresh install and the system settings screen was the only way to grant it. Now the
+  request fires when that option is chosen, and a denial falls back to manual rather than leaving
+  the radio on a mode that cannot work.
 
 Looking at it also found a defect no test would have: the day arc's end labels were drawn from
 `Prayer.shortName` — an ASCII identifier meant for the complication text budget — so they stayed
@@ -56,15 +64,14 @@ Looking at it also found a defect no test would have: the day arc's end labels w
 
 ### Still not verified on hardware
 
-- **Both home screen widgets.** They cannot be placed from adb — `cmd appwidget` has no shell
-  implementation — so someone has to drag them onto a home screen once. Until then: whether the
-  layouts fit, whether the `Chronometer` counts down rather than up, whether the alarm fires close
-  enough to a boundary to look instant, and how the palette reads over a real wallpaper.
-- **The complications on a watch face**, for the same reason: adding one is a manual step. The phase
-  logic is unit-tested, but two things need sitting with the watch through a prayer — that a
-  countdown rolls over at the Adhan, and that a gauge sweeps without resetting when its text
-  switches to seconds.
+- **Whether the alarm fires close enough to a prayer boundary to look instant.** This needs sitting
+  with a widget through an Adhan; everything up to that point is confirmed.
+- **A complication rolling over at the Adhan**, and a gauge sweeping without resetting when its text
+  switches to seconds. Same reason — it takes a prayer passing while someone watches.
 - **The light theme.**
+- **The schedule widget's spare vertical space and truncated labels.** At three cells wide the
+  prayer name column clips "Maghrib" to "Maghr…" and the date to "Satur…", and roughly a quarter of
+  its height goes unused. Seen, not yet addressed.
 
 The seven glyphs — six prayers plus the mosque shown during an Iqama countdown — were rendered to
 PNG and inspected at 96px and 20px, so they are known to read at size, but not how they sit against

@@ -5,21 +5,34 @@
     Five cells by one, which on the target device measures 406dp x 96dp — enough for four lines per
     column at legible sizes.
 
-    Both `targetCellWidth`/`targetCellHeight` and `minWidth`/`minHeight` are set, and they have to
-    agree: the cell counts are honoured from API 31, and everything before that sizes the initial
-    placement from the dp values alone. 330dp is chosen to land on five columns rather than four on
-    a typical phone grid.
+    Both `targetCellWidth`/`targetCellHeight` and `minWidth`/`minHeight` are set, and **they have to
+    agree**. The cell counts are honoured from API 31; the dp values size the placement before that,
+    and some launchers take the larger of the two either way. The platform derives spans as
+    `ceil((size + 30) / 70)`, so those numbers are not free-form:
+
+        5 columns  ->  250 < minWidth  <= 320
+        1 row      ->        minHeight <= 40
+
+    A previous minHeight of 90dp derived to two rows and the widget was placed 5x2 despite
+    `targetCellHeight="1"`, which is exactly the contradiction this comment exists to prevent.
+    Do not raise minHeight to reflect how tall the content is — that is what the row height gives
+    you (a 1-row strip measures 96dp on a 450dpi phone), and minResizeHeight is what floors it.
+
+    Vertical resizing is allowed even though the strip is designed for a single row. A launcher
+    stores a widget's span when it is placed and does not re-derive it when the app updates, so a
+    widget added while the declaration was wrong stays the wrong size forever; without a vertical
+    handle the only remedy is to remove and re-add it.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/widget_prayer_strip"
     android:previewLayout="@layout/widget_prayer_strip"
-    android:minWidth="330dp"
-    android:minHeight="90dp"
+    android:minWidth="320dp"
+    android:minHeight="40dp"
     android:minResizeWidth="140dp"
     android:minResizeHeight="50dp"
     android:targetCellWidth="5"
     android:targetCellHeight="1"
-    android:resizeMode="horizontal"
+    android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:description="@string/strip_widget_description"
     android:updatePeriodMillis="0" />
