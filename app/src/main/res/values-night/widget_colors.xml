@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+        Brighter than the in-app palette on purpose. A widget is read at arm's length, over a
+        wallpaper the app does not control and often through a scrim, where the app's brass reads as
+        muddy grey. The passed-prayer grey is left alone: dimming is its whole job.
+    -->
     <color name="widget_background">#FF0D1220</color>
-    <color name="widget_ink">#FFF0F2F8</color>
-    <color name="widget_ink_muted">#FF9AA3BC</color>
+    <color name="widget_ink">#FFFFFFFF</color>
+    <color name="widget_ink_muted">#FFC2CADB</color>
     <color name="widget_ink_faint">#FF5C6480</color>
     <color name="widget_line">#FF1F2739</color>
-    <color name="widget_accent">#FFC9A227</color>
+    <color name="widget_accent">#FFFFC93C</color>
     <color name="widget_row_highlight">#FF151C2E</color>
+
+    <!-- The Iqama countdown. Hotter than the Adhan's yellow, so the escalation is legible without
+         reading the number — and paired with an icon swap, so colour is never the only signal. -->
+    <color name="widget_iqama">#FFFF6B4A</color>
 </resources>

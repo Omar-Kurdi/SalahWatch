@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.RemoteViews
 import com.salahwatch.app.MainActivity
 import com.salahwatch.app.R
+import com.salahwatch.core.calculation.TimeKind
 import com.salahwatch.core.model.Prayer
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -72,6 +73,23 @@ internal object StripWidgetViews {
         return views
     }
 
+    /** "3h" / "45m" / "under 5m", in the app's language and always with European digits. */
+    private fun Context.coarseText(countdown: CoarseCountdown): String {
+        val numeric = Locale.Builder()
+            .setLocale(resources.configuration.locales[0])
+            .setUnicodeLocaleKeyword("nu", "latn")
+            .build()
+
+        val template = getString(
+            when (countdown.unit) {
+                CoarseUnit.HOURS -> R.string.countdown_hours_short
+                CoarseUnit.MINUTES -> R.string.countdown_minutes_short
+                CoarseUnit.IMMINENT -> R.string.countdown_under_minutes_short
+            },
+        )
+        return String.format(numeric, template, countdown.amount)
+    }
+
     @Suppress("LongParameterList")
     private fun RemoteViews.bindColumn(
         context: Context,
@@ -106,60 +124,116 @@ internal object StripWidgetViews {
             },
         )
 
-        setImageViewResource(ids.ICON[slot], prayer.icon())
+        // The icon is the primary signal that a countdown has moved from the Adhan to the Iqama:
+        // the prayer's own glyph becomes a mosque. Colour carries the same information a second
+        // time, so neither has to be noticed on its own.
+        val countingToIqama = row.countdown?.kind == TimeKind.IQAMA
+        setImageViewResource(
+            ids.ICON[slot],
+            if (countingToIqama) R.drawable.ic_prayer_iqama else prayer.icon(),
+        )
         // Tinting from code rather than by `android:tint` in the vector: that attribute is not
         // reliably honoured for RemoteViews on API 29–30, so the icon would ignore the theme.
-        setInt(ids.ICON[slot], "setColorFilter", ink)
+        setInt(
+            ids.ICON[slot],
+            "setColorFilter",
+            if (countingToIqama) context.getColor(R.color.widget_iqama) else ink,
+        )
 
         setTextViewText(ids.NAME[slot], context.prayerName(prayer))
-        setTextColor(ids.NAME[slot], ink)
+        setTextColor(
+            ids.NAME[slot],
+            if (row.isNext) ink else context.getColor(R.color.widget_ink_muted),
+        )
         setTextViewTextSize(ids.NAME[slot], TypedValue.COMPLEX_UNIT_SP, layout.nameTextSp)
 
-        setTextViewText(ids.TIME[slot], time.format(row.adhan.atZone(content.zone)))
+        // The marked prayer's time is the one its countdown refers to, which after the last prayer
+        // of the day is tomorrow's — see WidgetContent.markedFor.
+        val shown = if (row.isNext) row.countdown?.target ?: row.adhan else row.adhan
+        val timeText = if (row.isNext && row.countdown?.kind == TimeKind.IQAMA) {
+            time.format(row.adhan.atZone(content.zone))
+        } else {
+            time.format(shown.atZone(content.zone))
+        }
+        setTextViewText(ids.TIME[slot], timeText)
         setTextColor(ids.TIME[slot], ink)
         setTextViewTextSize(ids.TIME[slot], TypedValue.COMPLEX_UNIT_SP, layout.timeTextSp)
 
-        bindCountdown(slot, row, content, now, layout)
+        bindCountdown(context, slot, row, now, layout)
     }
 
-    /**
-     * The countdown, in the boxed column only.
+    /*
+     * The countdown line: ticking for the prayer in play, still for the rest, absent once passed.
      *
-     * It appears only when [CountdownStyle.TICKING] — that is, once inside the seconds window. The
-     * rest of the time the countdown *is* the clock time already on the row above it, so a second
-     * line would repeat it. This is the same rule the schedule widget applies, read off the same
-     * [WidgetContent]; the strip introduces no threshold of its own.
+     * Only one prayer is ever close enough for seconds to mean anything, so only that one gets a
+     * `Chronometer`. The others would otherwise tick five columns of seconds in unison — motion
+     * carrying no information, for a prayer hours away.
      */
+
     private fun RemoteViews.bindCountdown(
+        context: Context,
         slot: Int,
         row: WidgetRow,
-        content: WidgetContent,
         now: Instant,
         layout: StripLayout,
     ) {
-        val headline = content.headline
-        val ticking = row.isNext &&
-            headline != null &&
-            headline.style == CountdownStyle.TICKING
+        val countdown = row.countdown
+        val coarse = countdown
+            ?.takeUnless { it.isLive }
+            ?.let { coarseCountdown(now, it.target) }
 
-        if (!ticking) {
-            setViewVisibility(StripIds.COUNTDOWN[slot], View.GONE)
-            return
+        when {
+            countdown == null || (!countdown.isLive && coarse == null) -> hideCountdown(slot)
+            countdown.isLive -> bindTicking(context, slot, countdown, now, layout)
+            else -> bindStill(context, slot, requireNotNull(coarse), layout)
         }
+    }
 
-        setViewVisibility(StripIds.COUNTDOWN[slot], View.VISIBLE)
-        setTextViewTextSize(
-            StripIds.COUNTDOWN[slot],
-            TypedValue.COMPLEX_UNIT_SP,
-            layout.countdownTextSp,
+    private fun RemoteViews.hideCountdown(slot: Int) {
+        setViewVisibility(StripIds.LIVE[slot], View.GONE)
+        setViewVisibility(StripIds.STILL[slot], View.GONE)
+    }
+
+    /** The prayer in play: a `Chronometer` the system ticks, seconds and all. */
+    private fun RemoteViews.bindTicking(
+        context: Context,
+        slot: Int,
+        countdown: RowCountdown,
+        now: Instant,
+        layout: StripLayout,
+    ) {
+        val live = StripIds.LIVE[slot]
+        setViewVisibility(StripIds.STILL[slot], View.GONE)
+        setViewVisibility(live, View.VISIBLE)
+        setTextViewTextSize(live, TypedValue.COMPLEX_UNIT_SP, layout.countdownTextSp)
+        setTextColor(
+            live,
+            context.getColor(
+                if (countdown.kind == TimeKind.IQAMA) R.color.widget_iqama else R.color.widget_accent,
+            ),
         )
         setChronometer(
-            StripIds.COUNTDOWN[slot],
-            SystemClock.elapsedRealtime() + (headline.target.toEpochMilli() - now.toEpochMilli()),
+            live,
+            SystemClock.elapsedRealtime() + (countdown.target.toEpochMilli() - now.toEpochMilli()),
             null,
             true,
         )
-        setChronometerCountDown(StripIds.COUNTDOWN[slot], true)
+        setChronometerCountDown(live, true)
+    }
+
+    /** Everything further out: a still figure, redrawn only when the figure itself changes. */
+    private fun RemoteViews.bindStill(
+        context: Context,
+        slot: Int,
+        coarse: CoarseCountdown,
+        layout: StripLayout,
+    ) {
+        val still = StripIds.STILL[slot]
+        setViewVisibility(StripIds.LIVE[slot], View.GONE)
+        setViewVisibility(still, View.VISIBLE)
+        setTextViewText(still, context.coarseText(coarse))
+        setTextColor(still, context.getColor(R.color.widget_ink_muted))
+        setTextViewTextSize(still, TypedValue.COMPLEX_UNIT_SP, layout.countdownTextSp)
     }
 
     /**
@@ -217,8 +291,15 @@ internal object StripIds {
         R.id.strip_0_time, R.id.strip_1_time, R.id.strip_2_time,
         R.id.strip_3_time, R.id.strip_4_time,
     )
-    val COUNTDOWN = intArrayOf(
-        R.id.strip_0_countdown, R.id.strip_1_countdown, R.id.strip_2_countdown,
-        R.id.strip_3_countdown, R.id.strip_4_countdown,
+    /** The still countdown for prayers further out. */
+    val STILL = intArrayOf(
+        R.id.strip_0_still, R.id.strip_1_still, R.id.strip_2_still,
+        R.id.strip_3_still, R.id.strip_4_still,
+    )
+
+    /** The ticking countdown, used by the prayer in play and no other. */
+    val LIVE = intArrayOf(
+        R.id.strip_0_live, R.id.strip_1_live, R.id.strip_2_live,
+        R.id.strip_3_live, R.id.strip_4_live,
     )
 }

@@ -2,10 +2,14 @@
 <!--
     The one-row strip widget: five prayers across a single cell of home screen.
 
-    Columns are weighted rather than fixed, so the strip fills whatever width it is given and each
-    column keeps an equal share of it. `gravity="top"` on the row matters: the countdown line is
-    present in every column but visible in only one, and without it the four short columns would
-    centre themselves against the tall one and the times would stop forming a line.
+    Four lines per column — icon, name, Adhan time, countdown — each on its own line. Measured on
+    the target device a 5x1 placement is 406dp x 96dp, which leaves room for all four at legible
+    sizes; the earlier three-line version left roughly forty of those ninety-six vertical dp empty.
+
+    Columns are weighted rather than fixed, so the strip fills whatever width it is given.
+    `gravity="top"` on the row matters: the countdown line is present in every column but empty in
+    the passed ones, and without it the short columns would centre against the tall ones and the
+    times would stop forming a line.
 
     The hardcoded values are placeholders that also serve as the widget picker's preview, which
     inflates this file without ever running the binder. Every one is overwritten by StripWidgetViews.
@@ -15,7 +19,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:padding="6dp">
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp">
 
     <LinearLayout
         android:id="@+id/strip_columns"
@@ -32,13 +39,13 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp">
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp">
 
             <ImageView
                 android:id="@+id/strip_0_icon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/ic_prayer_fajr"
                 android:contentDescription="@string/prayer_fajr" />
 
@@ -46,10 +53,9 @@
                 android:id="@+id/strip_0_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
                 android:text="Fajr"
-                android:textSize="10sp"
-                android:textColor="@color/widget_ink"
+                android:textSize="12sp"
+                android:textColor="@color/widget_ink_muted"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -57,17 +63,26 @@
                 android:id="@+id/strip_0_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="4:35 AM"
-                android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:text="4:34 am"
+                android:textSize="15sp"
                 android:textColor="@color/widget_ink"
                 android:maxLines="1" />
 
-            <Chronometer
-                android:id="@+id/strip_0_countdown"
+            <!-- Still countdown and ticking countdown occupy the same line; exactly one shows. -->
+            <TextView
+                android:id="@+id/strip_0_still"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="11sp"
+                android:text="3h"
+                android:textSize="13sp"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_0_live"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
                 android:fontFamily="monospace"
                 android:textColor="@color/widget_accent"
                 android:maxLines="1"
@@ -81,13 +96,13 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp">
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp">
 
             <ImageView
                 android:id="@+id/strip_1_icon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/ic_prayer_dhuhr"
                 android:contentDescription="@string/prayer_dhuhr" />
 
@@ -95,10 +110,9 @@
                 android:id="@+id/strip_1_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
                 android:text="Dhuhr"
-                android:textSize="10sp"
-                android:textColor="@color/widget_ink"
+                android:textSize="12sp"
+                android:textColor="@color/widget_ink_muted"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -106,17 +120,26 @@
                 android:id="@+id/strip_1_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="12:24 PM"
-                android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:text="12:23 pm"
+                android:textSize="15sp"
                 android:textColor="@color/widget_ink"
                 android:maxLines="1" />
 
-            <Chronometer
-                android:id="@+id/strip_1_countdown"
+            <!-- Still countdown and ticking countdown occupy the same line; exactly one shows. -->
+            <TextView
+                android:id="@+id/strip_1_still"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="11sp"
+                android:text="7h"
+                android:textSize="13sp"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_1_live"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
                 android:fontFamily="monospace"
                 android:textColor="@color/widget_accent"
                 android:maxLines="1"
@@ -130,13 +153,13 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp">
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp">
 
             <ImageView
                 android:id="@+id/strip_2_icon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/ic_prayer_asr"
                 android:contentDescription="@string/prayer_asr" />
 
@@ -144,10 +167,9 @@
                 android:id="@+id/strip_2_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
                 android:text="Asr"
-                android:textSize="10sp"
-                android:textColor="@color/widget_ink"
+                android:textSize="12sp"
+                android:textColor="@color/widget_ink_muted"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -155,17 +177,26 @@
                 android:id="@+id/strip_2_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3:49 PM"
-                android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:text="3:49 pm"
+                android:textSize="15sp"
                 android:textColor="@color/widget_ink"
                 android:maxLines="1" />
 
-            <Chronometer
-                android:id="@+id/strip_2_countdown"
+            <!-- Still countdown and ticking countdown occupy the same line; exactly one shows. -->
+            <TextView
+                android:id="@+id/strip_2_still"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="11sp"
+                android:text="10h"
+                android:textSize="13sp"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_2_live"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
                 android:fontFamily="monospace"
                 android:textColor="@color/widget_accent"
                 android:maxLines="1"
@@ -179,13 +210,13 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp">
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp">
 
             <ImageView
                 android:id="@+id/strip_3_icon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/ic_prayer_maghrib"
                 android:contentDescription="@string/prayer_maghrib" />
 
@@ -193,10 +224,9 @@
                 android:id="@+id/strip_3_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
                 android:text="Maghrib"
-                android:textSize="10sp"
-                android:textColor="@color/widget_ink"
+                android:textSize="12sp"
+                android:textColor="@color/widget_ink_muted"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -204,17 +234,26 @@
                 android:id="@+id/strip_3_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="6:48 PM"
-                android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:text="6:48 pm"
+                android:textSize="15sp"
                 android:textColor="@color/widget_ink"
                 android:maxLines="1" />
 
-            <Chronometer
-                android:id="@+id/strip_3_countdown"
+            <!-- Still countdown and ticking countdown occupy the same line; exactly one shows. -->
+            <TextView
+                android:id="@+id/strip_3_still"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="11sp"
+                android:text="13h"
+                android:textSize="13sp"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_3_live"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
                 android:fontFamily="monospace"
                 android:textColor="@color/widget_accent"
                 android:maxLines="1"
@@ -228,13 +267,13 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp">
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp">
 
             <ImageView
                 android:id="@+id/strip_4_icon"
-                android:layout_width="16dp"
-                android:layout_height="16dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/ic_prayer_isha"
                 android:contentDescription="@string/prayer_isha" />
 
@@ -242,10 +281,9 @@
                 android:id="@+id/strip_4_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
                 android:text="Isha"
-                android:textSize="10sp"
-                android:textColor="@color/widget_ink"
+                android:textSize="12sp"
+                android:textColor="@color/widget_ink_muted"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -253,17 +291,26 @@
                 android:id="@+id/strip_4_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="8:18 PM"
-                android:textSize="12sp"
-                android:fontFamily="monospace"
+                android:text="8:04 pm"
+                android:textSize="15sp"
                 android:textColor="@color/widget_ink"
                 android:maxLines="1" />
 
-            <Chronometer
-                android:id="@+id/strip_4_countdown"
+            <!-- Still countdown and ticking countdown occupy the same line; exactly one shows. -->
+            <TextView
+                android:id="@+id/strip_4_still"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="11sp"
+                android:text="15h"
+                android:textSize="13sp"
+                android:textColor="@color/widget_ink_muted"
+                android:maxLines="1" />
+
+            <Chronometer
+                android:id="@+id/strip_4_live"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
                 android:fontFamily="monospace"
                 android:textColor="@color/widget_accent"
                 android:maxLines="1"
@@ -277,7 +324,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:textColor="@color/widget_ink_muted"
         android:visibility="gone" />
 </FrameLayout>

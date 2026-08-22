@@ -161,28 +161,130 @@ class WidgetContentTest {
     }
 
     @Test
-    fun `does not mark today's Fajr while counting to tomorrow's`() {
-        // Just after Isha's Iqama, the next prayer is Fajr — but tomorrow's. Today's Fajr is
-        // sixteen hours past and must not be highlighted.
+    fun `after the last prayer, the Fajr row is marked and counts to tomorrow`() {
+        // Just after Isha's Iqama the next prayer is Fajr, but tomorrow's — which appears at no
+        // instant in today's list. Leaving nothing marked greys the entire widget out and shows a
+        // finished day with nothing coming, which is what it did on the device.
         val content = contentAt(day, "20:40")
         val headline = requireNotNull(content.headline)
 
         assertEquals(Prayer.FAJR, headline.prayer)
         assertEquals(at(tomorrow, "04:35"), headline.target)
-        assertTrue(
-            content.rows.none { it.isNext },
-            "Tomorrow's Fajr is not on today's list, so no row should be marked",
+
+        val marked = content.rows.single { it.isNext }
+        assertEquals(Prayer.FAJR, marked.prayer)
+        assertEquals(
+            at(tomorrow, "04:35"),
+            requireNotNull(marked.countdown).target,
+            "It must count to tomorrow's Fajr, not to today's which is sixteen hours past",
         )
     }
 
     @Test
-    fun `wakes at the window crossing when that comes first`() {
+    fun `only the prayer in play ticks, and only it shows seconds`() {
         val content = contentAt(day, "10:00")
+        val live = content.rows.filter { it.countdown?.isLive == true }
 
         assertEquals(
-            at(day, "12:24").minus(SecondsWindow.ADHAN),
-            content.validUntil,
-            "The next thing to happen is the countdown starting to tick",
+            listOf(Prayer.DHUHR),
+            live.map { it.prayer },
+            "Exactly one prayer is ever close enough for seconds to mean anything",
+        )
+    }
+
+    @Test
+    fun `every prayer still ahead carries a countdown, and passed ones do not`() {
+        val content = contentAt(day, "10:00")
+        val withCountdown = content.rows.filter { it.countdown != null }.map { it.prayer }
+
+        assertEquals(
+            listOf(Prayer.DHUHR, Prayer.ASR, Prayer.MAGHRIB, Prayer.ISHA),
+            withCountdown,
+            "Fajr has passed and Sunrise is not a prayer",
+        )
+        assertTrue(
+            withCountdown.drop(1).all { prayer ->
+                content.rows.single { it.prayer == prayer }.countdown?.isLive == false
+            },
+            "Only the prayer in play ticks",
+        )
+    }
+
+    @Test
+    fun `a later prayer counts to its own Adhan, not to the Iqama of the current one`() {
+        // 12:30 is between Dhuhr's Adhan and its Iqama, so Dhuhr counts to the Iqama while Asr
+        // must still be counting to its own Adhan.
+        val content = contentAt(day, "12:30")
+
+        val dhuhr = requireNotNull(content.rows.single { it.prayer == Prayer.DHUHR }.countdown)
+        val asr = requireNotNull(content.rows.single { it.prayer == Prayer.ASR }.countdown)
+
+        assertEquals(TimeKind.IQAMA, dhuhr.kind)
+        assertEquals(at(day, "12:44"), dhuhr.target)
+        assertEquals(TimeKind.ADHAN, asr.kind)
+        assertEquals(at(day, "15:49"), asr.target)
+    }
+
+    @Test
+    fun `a still countdown never displays a value that has gone stale`() {
+        // The displayed figure and the redraw are derived from the same number, so whatever it
+        // says is true for exactly as long as it is on screen.
+        val target = at(day, "15:49")
+
+        val far = requireNotNull(coarseCountdown(at(day, "10:26"), target))
+        assertEquals(5L, far.amount)
+        assertEquals(CoarseUnit.HOURS, far.unit)
+        assertEquals(
+            target.minus(Duration.ofHours(5)),
+            far.changesAt,
+            "It reads 5h until it is genuinely no longer five hours",
+        )
+
+        val near = requireNotNull(coarseCountdown(at(day, "15:16"), target))
+        assertEquals(30L, near.amount)
+        assertEquals(CoarseUnit.MINUTES, near.unit)
+        assertEquals(target.minus(Duration.ofMinutes(30)), near.changesAt)
+    }
+
+    @Test
+    fun `a still countdown rounds down, so it reads as a floor`() {
+        val target = at(day, "15:49")
+        val almostSix = requireNotNull(coarseCountdown(at(day, "09:52"), target))
+
+        assertEquals(5L, almostSix.amount, "5h57m is 'at least five hours', not 'about six'")
+    }
+
+    @Test
+    fun `the widget wakes when a still countdown would change, not only at phase boundaries`() {
+        // At 10:00 the next phase boundary is hours away, but Asr's still countdown drops from 6h
+        // to 5h at 09:49 + ... — well before it. Missing that leaves a stale figure on screen.
+        val content = contentAt(day, "10:00")
+        val validUntil = requireNotNull(content.validUntil)
+
+        val nextStillChange = content.rows
+            .mapNotNull { it.countdown }
+            .filterNot { it.isLive }
+            .mapNotNull { coarseCountdown(at(day, "10:00"), it.target)?.changesAt }
+            .min()
+
+        assertTrue(
+            validUntil <= nextStillChange,
+            "validUntil ($validUntil) must not overshoot the next still-countdown change " +
+                "($nextStillChange)",
+        )
+    }
+
+    @Test
+    fun `wakes for whichever comes first — a phase, a window, or a still figure changing`() {
+        // At 10:00 the countdown starts ticking at 12:09, but Isha's still figure drops from 10h
+        // to 9h at 10:18. The earlier one wins, or "10h" sits on screen after it stopped being
+        // true. Before still countdowns existed this test expected the 12:09 crossing.
+        val content = contentAt(day, "10:00")
+
+        assertEquals(at(day, "10:18"), content.validUntil)
+        assertTrue(
+            requireNotNull(content.validUntil) < at(day, "12:24").minus(SecondsWindow.ADHAN),
+            "A still figure changes well before the seconds window opens",
         )
     }
 

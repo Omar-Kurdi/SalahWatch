@@ -52,6 +52,25 @@ internal data class WidgetRow(
     val iqama: Instant?,
     val isNext: Boolean,
     val hasPassed: Boolean,
+    /** How long until this prayer, or null once it has passed. See [RowCountdown]. */
+    val countdown: RowCountdown?,
+)
+
+/**
+ * The countdown shown against one prayer.
+ *
+ * [isLive] is the whole point of this type. Only the prayer currently in play gets a ticking,
+ * to-the-second countdown; every other prayer shows a still figure that says how long, in units
+ * coarse enough to stay true between redraws. Two prayers are never close enough at once for a
+ * second one to need seconds, so five ticking columns would be five times the visual noise for no
+ * information — and a still figure costs nothing to keep honest, because its precision is chosen to
+ * match how often it is redrawn.
+ */
+internal data class RowCountdown(
+    val target: Instant,
+    val kind: TimeKind,
+    /** True for the prayer in play: rendered as a self-ticking `Chronometer`, seconds and all. */
+    val isLive: Boolean,
 )
 
 /**
@@ -108,39 +127,125 @@ internal fun widgetContentFor(
     val zone = today.firstOrNull()?.zone ?: ZoneId.systemDefault()
 
     val headline = headlineAt(calendar, now, builder)
-    val next = headline?.let { head ->
-        today.firstOrNull { it.prayer == head.prayer && it.isThePrayerBehind(head) }
+    val next = headline?.let { head -> today.markedFor(head) }
+
+    val rows = today.map { occurrence ->
+        val isNext = occurrence === next
+        WidgetRow(
+            prayer = occurrence.prayer,
+            adhan = occurrence.adhan,
+            iqama = occurrence.iqama,
+            isNext = isNext,
+            hasPassed = occurrence.adhan < now,
+            countdown = countdownFor(occurrence, isNext, headline, now),
+        )
     }
 
     return WidgetContent(
         date = date,
         zone = zone,
-        rows = today.map { occurrence ->
-            WidgetRow(
-                prayer = occurrence.prayer,
-                adhan = occurrence.adhan,
-                iqama = occurrence.iqama,
-                isNext = occurrence === next,
-                hasPassed = occurrence.adhan < now,
-            )
-        },
+        rows = rows,
         headline = headline,
         locationLabel = locationLabel,
         isEstimated = today.any { it.source.isEstimate },
-        validUntil = validUntil(calendar, now, builder),
+        validUntil = validUntil(calendar, now, builder, rows),
     )
 }
 
 /**
- * Whether this occurrence is the one the headline is counting towards.
+ * A still countdown: a number, its unit, and the instant the number changes.
  *
- * Matching on the prayer alone is not enough across midnight: at 00:30 the headline may be counting
- * to *tomorrow's* Fajr while today's Fajr sits in the list, and highlighting the wrong one would
- * mark a prayer eighteen hours past as the one coming up.
+ * The unit is deliberately coarse, and [changesAt] is what makes that honest rather than lazy. The
+ * displayed precision and the redraw are derived from the same figure, so the widget is never
+ * showing a value that has quietly gone stale — it says "5h" for exactly as long as it is five
+ * hours, and is redrawn the moment it becomes four.
+ *
+ * The alternative, a live figure accurate to the minute, would mean redrawing every sixty seconds
+ * for every prayer on screen. That is roughly fourteen hundred wakeups a day against this app's
+ * central claim that it does not wake up to tick a clock.
  */
-private fun PrayerOccurrence.isThePrayerBehind(headline: WidgetHeadline): Boolean = when (headline.kind) {
-    TimeKind.ADHAN -> adhan == headline.target
-    TimeKind.IQAMA -> iqama == headline.target
+internal data class CoarseCountdown(
+    val amount: Long,
+    val unit: CoarseUnit,
+    val changesAt: Instant,
+)
+
+internal enum class CoarseUnit {
+    HOURS,
+    MINUTES,
+
+    /** Less than one step away. Shown as "under 5m" rather than counting down to nothing. */
+    IMMINENT,
+}
+
+/**
+ * Rounds the wait down to something that stays true between redraws.
+ *
+ * Whole hours at range, five-minute steps inside the last hour. Rounding *down* is what makes it
+ * readable as a floor — "3h" means at least three hours — rather than as an approximation that
+ * could be over or under.
+ */
+internal fun coarseCountdown(from: Instant, to: Instant): CoarseCountdown? {
+    val remaining = Duration.between(from, to)
+    val hours = remaining.toHours()
+    val step = remaining.toMinutes() / COARSE_STEP_MINUTES * COARSE_STEP_MINUTES
+
+    return when {
+        remaining.isNegative || remaining.isZero -> null
+
+        remaining >= Duration.ofHours(1) ->
+            CoarseCountdown(hours, CoarseUnit.HOURS, to.minus(Duration.ofHours(hours)))
+
+        step <= 0 -> CoarseCountdown(COARSE_STEP_MINUTES, CoarseUnit.IMMINENT, to)
+
+        else -> CoarseCountdown(step, CoarseUnit.MINUTES, to.minus(Duration.ofMinutes(step)))
+    }
+}
+
+/** How finely a still countdown steps inside the last hour. */
+private const val COARSE_STEP_MINUTES = 5L
+
+/**
+ * The row the headline is counting towards.
+ *
+ * Matching on the exact instant is tried first, because within a day it is unambiguous. When that
+ * fails the match falls back to the prayer itself, and that fallback is not a leniency — it is the
+ * only thing that makes the widget useful after the last prayer of the day. From Isha until
+ * midnight the headline counts to *tomorrow's* Fajr, which is not in today's list at any instant;
+ * without the fallback nothing at all is marked and the whole widget greys out, showing a day that
+ * is over and nothing coming.
+ */
+private fun List<PrayerOccurrence>.markedFor(headline: WidgetHeadline): PrayerOccurrence? {
+    val exact = firstOrNull {
+        when (headline.kind) {
+            TimeKind.ADHAN -> it.adhan == headline.target
+            TimeKind.IQAMA -> it.iqama == headline.target
+        }
+    }
+    return exact ?: firstOrNull { it.prayer == headline.prayer }
+}
+
+/**
+ * How long until [occurrence], or null once it is behind us.
+ *
+ * The marked prayer takes its target from the headline, so it follows the Adhan → Iqama cycle the
+ * phase timeline defines rather than a second reading of it. Every other prayer still ahead counts
+ * to its own Adhan, and does so as a still figure.
+ */
+private fun countdownFor(
+    occurrence: PrayerOccurrence,
+    isNext: Boolean,
+    headline: WidgetHeadline?,
+    now: Instant,
+): RowCountdown? = when {
+    isNext && headline != null ->
+        RowCountdown(target = headline.target, kind = headline.kind, isLive = true)
+
+    // Sunrise is shown but never counted down to — it is not a prayer.
+    occurrence.prayer.isPrayer && occurrence.adhan > now ->
+        RowCountdown(target = occurrence.adhan, kind = TimeKind.ADHAN, isLive = false)
+
+    else -> null
 }
 
 private fun headlineAt(
@@ -175,15 +280,25 @@ private fun validUntil(
     calendar: PrayerCalendar,
     now: Instant,
     builder: PhaseTimelineBuilder,
+    rows: List<WidgetRow>,
 ): Instant? {
-    val phase = currentPhase(calendar, now, builder) ?: return null
-    val content = phase.content
+    val phase = currentPhase(calendar, now, builder)
+    val content = phase?.content
 
     val windowOpens = (content as? PhaseContent.CountDown)
         ?.let { it.target.minus(SecondsWindow.forKind(it.kind)) }
         ?.takeIf { it > now }
 
-    return listOfNotNull(phase.end, windowOpens).min()
+    // Every still countdown on screen is also a deadline: the instant its number changes is an
+    // instant this rendering stops being true. Missing these is what would leave "3h" on screen
+    // for the following hour.
+    val stillChanges = rows
+        .mapNotNull { it.countdown }
+        .filterNot { it.isLive }
+        .mapNotNull { coarseCountdown(now, it.target)?.changesAt }
+        .filter { it > now }
+
+    return (listOfNotNull(phase?.end, windowOpens) + stillChanges).minOrNull()
 }
 
 private fun currentPhase(

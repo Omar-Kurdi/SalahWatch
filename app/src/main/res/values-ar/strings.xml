@@ -96,4 +96,7 @@
     <string name="widget_description">مواقيت اليوم، مع العد التنازلي للأذان أو الإقامة القادمة.</string>
     <string name="strip_widget_label">صف الصلوات</string>
     <string name="strip_widget_description">الصلوات الخمس في صف واحد، مع العد التنازلي للصلاة القادمة.</string>
+    <string name="countdown_hours_short">%1$d س</string>
+    <string name="countdown_minutes_short">%1$d د</string>
+    <string name="countdown_under_minutes_short">أقل من %1$d د</string>
 </resources>

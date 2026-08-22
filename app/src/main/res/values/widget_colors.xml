@@ -16,6 +16,9 @@
     <color name="widget_ink_muted">#FF5A6172</color>
     <color name="widget_ink_faint">#FF8D93A3</color>
     <color name="widget_line">#FFDED8C9</color>
-    <color name="widget_accent">#FF8A6D12</color>
+    <color name="widget_accent">#FF8A6100</color>
     <color name="widget_row_highlight">#FFEFEADD</color>
+
+    <!-- Deeper than the dark theme's, to keep contrast against a pale ground. -->
+    <color name="widget_iqama">#FFC2410C</color>
 </resources>

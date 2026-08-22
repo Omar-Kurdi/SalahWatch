@@ -28,7 +28,8 @@ class StripWidgetTest {
             "ICON" to StripIds.ICON,
             "NAME" to StripIds.NAME,
             "TIME" to StripIds.TIME,
-            "COUNTDOWN" to StripIds.COUNTDOWN,
+            "STILL" to StripIds.STILL,
+            "LIVE" to StripIds.LIVE,
         )
 
         for ((name, ids) in arrays) {

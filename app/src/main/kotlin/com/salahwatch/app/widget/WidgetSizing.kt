@@ -125,6 +125,22 @@ internal data class StripLayout(
     val iconSizeDp: Int,
 )
 
+/**
+ * Sizes are set against a measured placement, not a guess.
+ *
+ * `dumpsys appwidget` on the target device reports a 5x1 strip as **406dp x 96dp** at density
+ * 2.8125. Four lines at the sizes below come to roughly 84dp, which fits inside 96dp less padding
+ * with a little slack for a launcher that is stingier. The previous values were tuned against an
+ * assumed ~70dp cell and left about forty vertical dp unused.
+ */
+private val FULL_STRIP = StripLayout(
+    showMeridiem = true,
+    nameTextSp = 12f,
+    timeTextSp = 15f,
+    countdownTextSp = 13f,
+    iconSizeDp = 20,
+)
+
 internal fun stripLayoutFor(size: WidgetSize): StripLayout {
     if (size.isUnknown) return FULL_STRIP
 
@@ -133,29 +149,21 @@ internal fun stripLayoutFor(size: WidgetSize): StripLayout {
 
         size.widthDp >= STRIP_MEDIUM_MIN_WIDTH_DP -> StripLayout(
             showMeridiem = true,
-            nameTextSp = 9f,
-            timeTextSp = 11f,
-            countdownTextSp = 10f,
-            iconSizeDp = 14,
+            nameTextSp = 10f,
+            timeTextSp = 12f,
+            countdownTextSp = 11f,
+            iconSizeDp = 16,
         )
 
         else -> StripLayout(
             showMeridiem = false,
-            nameTextSp = 8f,
-            timeTextSp = 10f,
-            countdownTextSp = 9f,
-            iconSizeDp = 12,
+            nameTextSp = 9f,
+            timeTextSp = 11f,
+            countdownTextSp = 10f,
+            iconSizeDp = 13,
         )
     }
 }
-
-private val FULL_STRIP = StripLayout(
-    showMeridiem = true,
-    nameTextSp = 10f,
-    timeTextSp = 12f,
-    countdownTextSp = 11f,
-    iconSizeDp = 16,
-)
 
 /**
  * Three cells tall or more, at the ~70dp cell most launchers use.
@@ -172,8 +180,12 @@ private const val MEDIUM_MIN_HEIGHT_DP = 150
 /** Below this — under about three cells — a second column of times crowds out the prayer names. */
 private const val IQAMA_COLUMN_MIN_WIDTH_DP = 190
 
-/** Four cells or more: five columns with room for `4:35 AM` in each. */
-private const val STRIP_WIDE_MIN_WIDTH_DP = 250
+/**
+ * Four cells or more, which the device reports as ~325dp — a 5x1 measures 406dp.
+ *
+ * Five columns with room for `4:35 am` and a countdown under it in each.
+ */
+private const val STRIP_WIDE_MIN_WIDTH_DP = 300
 
-/** Three cells. Below this the meridiem has to go. */
-private const val STRIP_MEDIUM_MIN_WIDTH_DP = 190
+/** Three cells, ~244dp on the measured device. Below this the meridiem has to go. */
+private const val STRIP_MEDIUM_MIN_WIDTH_DP = 220

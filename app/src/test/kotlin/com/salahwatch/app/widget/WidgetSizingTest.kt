@@ -109,12 +109,23 @@ class WidgetSizingTest {
 
     @Test
     fun `the strip keeps AM PM until it genuinely cannot fit`() {
-        assertTrue(stripLayoutFor(WidgetSize(widthDp = 260, heightDp = 60)).showMeridiem)
-        assertTrue(stripLayoutFor(WidgetSize(widthDp = 200, heightDp = 60)).showMeridiem)
+        // 406dp is the measured 5x1 placement on the target device; 244dp is three of its cells.
+        assertTrue(stripLayoutFor(WidgetSize(widthDp = 406, heightDp = 96)).showMeridiem)
+        assertTrue(stripLayoutFor(WidgetSize(widthDp = 244, heightDp = 96)).showMeridiem)
         assertFalse(
-            stripLayoutFor(WidgetSize(widthDp = 140, heightDp = 60)).showMeridiem,
+            stripLayoutFor(WidgetSize(widthDp = 165, heightDp = 96)).showMeridiem,
             "Below about three cells the meridiem is what has to give",
         )
+    }
+
+    @Test
+    fun `the measured 5x1 placement gets the largest strip layout`() {
+        // From `dumpsys appwidget` on the device: 406dp x 96dp at density 2.8125. If this ever
+        // stops being the top tier, the default placement has silently become cramped.
+        val layout = stripLayoutFor(WidgetSize(widthDp = 406, heightDp = 96))
+
+        assertEquals(20, layout.iconSizeDp)
+        assertEquals(15f, layout.timeTextSp)
     }
 
     @Test

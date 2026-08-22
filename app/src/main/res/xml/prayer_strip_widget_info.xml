@@ -2,18 +2,22 @@
 <!--
     The one-row strip. See prayer_widget_info.xml for why updatePeriodMillis is zero.
 
+    Five cells by one, which on the target device measures 406dp x 96dp — enough for four lines per
+    column at legible sizes.
+
     Both `targetCellWidth`/`targetCellHeight` and `minWidth`/`minHeight` are set, and they have to
     agree: the cell counts are honoured from API 31, and everything before that sizes the initial
-    placement from the dp values alone.
+    placement from the dp values alone. 330dp is chosen to land on five columns rather than four on
+    a typical phone grid.
 -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/widget_prayer_strip"
     android:previewLayout="@layout/widget_prayer_strip"
-    android:minWidth="250dp"
-    android:minHeight="60dp"
+    android:minWidth="330dp"
+    android:minHeight="90dp"
     android:minResizeWidth="140dp"
     android:minResizeHeight="50dp"
-    android:targetCellWidth="4"
+    android:targetCellWidth="5"
     android:targetCellHeight="1"
     android:resizeMode="horizontal"
     android:widgetCategory="home_screen"

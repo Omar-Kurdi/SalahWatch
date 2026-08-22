@@ -325,15 +325,42 @@ so there is one layout to keep correct. Note the options bundle is empty on firs
 treated as "full size", because guessing small on a large widget looks like a defect while guessing
 large on a small one is corrected within a frame.
 
-**Strip widget.** One row, four cells by one. Five prayers across, each with an icon, its name and
-its Adhan time. The prayer being counted to is boxed, and its countdown appears beneath it once
-inside the seconds window — driven by the same phase timeline, with no threshold of its own.
+**Strip widget.** One row, five cells by one. Five prayers across, each on four lines: an icon, its
+name, its Adhan time, and how long until it.
+
+Every prayer still ahead shows a countdown; passed ones are dimmed and show none. The prayer in play
+is boxed and counts to its Adhan, then to its own Iqama, following the phase timeline rather than a
+second reading of it. After the last prayer of the day the box moves to Fajr and counts to
+tomorrow's — without that the whole strip greys out from Isha until midnight, showing a finished day
+and nothing coming.
+
+**Only the prayer in play ticks.** It gets a `Chronometer`, seconds and all. Every other prayer
+shows a still figure — whole hours at range, five-minute steps inside the last hour — because two
+prayers are never close enough at once for a second one to need seconds, and five columns ticking in
+unison would be motion carrying no information. The still figures are honest rather than merely
+cheap: the displayed precision and the redraw are derived from the same number, so "3h" is on screen
+for exactly as long as it is three hours. A figure accurate to the minute would instead mean a
+redraw every sixty seconds, against this app's central claim that it does not wake up to tick a
+clock.
+
+**Telling Adhan from Iqama.** When the countdown turns to the Iqama the prayer's own glyph is
+replaced by a mosque, and the countdown changes colour. Two signals rather than one, so neither has
+to be noticed on its own — and so the distinction survives for a reader who cannot separate the two
+colours.
 
 Sunrise is not among the five. Five columns leave each one wide enough for a time and a countdown;
 six do not.
 
+Sizes are set against a measured placement rather than an assumed cell: `dumpsys appwidget` reports
+a 5×1 strip as **406dp × 96dp**. An earlier three-line version tuned to a guessed ~70dp cell left
+roughly forty of those ninety-six vertical dp empty.
+
 Both widgets follow the system light/dark setting rather than the in-app theme preference. They are
 drawn by the launcher, which has no access to the app's own setting.
+
+Their palette is brighter than the app's own. A widget is read at arm's length, over a wallpaper the
+app does not control and often through a scrim, where the in-app brass reads as muddy grey. The
+dimmed colour for passed prayers is left alone — dimming is its whole job.
 
 ---
 

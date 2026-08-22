@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+import com.salahwatch.app.label
 import com.salahwatch.core.calculation.PrayerOccurrence
 import com.salahwatch.core.model.Prayer
 import java.time.Instant
@@ -146,8 +147,11 @@ private fun ArcLabels(prayers: List<PrayerOccurrence>, fractionOf: (Instant) -> 
     androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth()) {
         val first = prayers.first()
         val last = prayers.last()
+        // The prayer's translated name, not `shortName`. That field is an ASCII identifier sized
+        // for the complication text budget, and using it here left "Fajr" and "Isha" in English at
+        // either end of the band while every other word on the screen was in Arabic.
         androidx.compose.material3.Text(
-            text = first.prayer.shortName.lowercase().replaceFirstChar(Char::uppercase),
+            text = first.prayer.label(),
             style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
             color = LocalPalette.current.inkFaint,
             modifier = Modifier.weight(1f),
@@ -161,7 +165,7 @@ private fun ArcLabels(prayers: List<PrayerOccurrence>, fractionOf: (Instant) -> 
             color = LocalPalette.current.inkFaint,
         )
         androidx.compose.material3.Text(
-            text = last.prayer.shortName.lowercase().replaceFirstChar(Char::uppercase),
+            text = last.prayer.label(),
             style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
             color = LocalPalette.current.inkFaint,
             modifier = Modifier.weight(1f),

@@ -12,43 +12,64 @@ building.
 
 | | State |
 |---|---|
-| Wear app + 5 complication providers | Built; complications render in the watch face picker |
-| Phone app — Today, Settings, location | Built and installed |
-| Phone app — date browsing (±1 month) | Built, **not yet seen on a screen** |
-| Home screen widgets (schedule + strip) | Built and unit-tested, **neither yet placed on a home screen** |
+| Wear app + 5 complication providers | Installed on a watch; all five providers registered. **Not yet placed on a watch face** |
+| Watch app | **Verified on device** — next prayer, countdown, both calendars, bezel ring |
+| Phone app — Today, Settings, location | **Verified on device** |
+| Phone app — date browsing (±1 month) | **Verified on device**, arrows and month grid both |
+| Home screen widgets (schedule + strip) | Built and unit-tested; **neither yet placed on a home screen** |
 | Prayer times — calculation | Working, cached a year at a time |
-| Prayer times — nearby mosque | Built and unit-tested, **not yet run on a device** |
-| Phone → watch sync (Data Layer) | Built, **not yet tested between two real devices** |
+| Prayer times — nearby mosque | **Verified on device** — a real mosque was found and listed |
+| Phone → watch sync (Data Layer) | **Verified between two real devices** |
 | Light theme | Built, **not yet seen on a screen** |
-| Arabic | Complete across every screen, the widget, and every complication |
+| Arabic | **Verified on device** — RTL, joined names, European digits throughout |
 | Store paperwork | Written, in `docs/`. Three hard blockers remain |
 
-### Not yet verified on hardware
+### Devices are available — check before assuming otherwise
 
-The nearby-mosque source, the Data Layer sync, the light theme, the day arc, the watch ring, Arabic,
-the date picker, the home screen widget, and the complications on a real watch face.
+A Samsung **SM-S918B** phone (Android 16, density 450) and a **SM-L330** watch (Wear OS, API 36,
+480x480 @ 340) connect over adb, with both apps installed. Run `adb devices` at the moment you need
+it; an earlier version of this file asserted no device existed, went stale within the same day, and
+led to a run of claims being reported as unverifiable when they were not.
 
-The phase logic is unit-tested, but two things can only be confirmed by sitting with a watch through
-a prayer: that a countdown rolls over at the Adhan, and that a gauge sweeps without resetting when
-its text switches to seconds.
+Both usually sit on a secured lock screen and re-lock quickly. Anything involving the launcher needs
+the user to unlock and keep them awake. Two devices means every `adb` call needs `-s <serial>`.
 
-The widgets' content logic is unit-tested — the Adhan → Iqama → next-prayer cycle, both seconds
-thresholds, the midnight case, the alarm instants, and the size tiers — but four things depend on
-the device: that the RemoteViews layouts inflate and fit, that the `Chronometer` counts *down*
-rather than up, that the alarm fires close enough to the boundary to look instant, and that the
-launcher's reported widget options match what the size tiers assume. That last one is the number
-most worth checking first: the tiers are tuned against an assumed ~70dp cell.
+### What the devices have settled
 
-The six prayer icons were rendered to PNG and inspected at both 96px and 20px, so they are known to
-read at size — but not how they sit against a real wallpaper.
+- **Phone → watch sync works.** A fresh watch install showed "Set a location in the phone app";
+  after the phone app republished, the watch had the full schedule. This was the longest-standing
+  unverified item in the project.
+- **The nearby-mosque source works.** A real mosque near the configured location was found and
+  listed, with its own Iqama offsets applied (Maghrib +8, the rest +20/+25).
+- **Date browsing works**, and the design decision behind it holds up: on another date the clock,
+  the day arc and the next-prayer panel are all absent, leaving a plain timetable, and the Hijri
+  date and times both track the chosen day.
+- **Arabic works**, including the part that could only be inferred before: every numeral renders in
+  European digits (`4:35 ص`, `خلال 5 س 6 د`) rather than Arabic-Indic, prayer names read as joined
+  words rather than spaced-out letters, and the layout mirrors.
+- **The strip widget's real placement is 406dp x 96dp**, which its size tiers are now tuned
+  against rather than an assumed ~70dp cell.
 
-The Arabic typography changes are likewise unverified by eye. What was measured is the mechanism:
-under an `ar` locale `String.format("%d")` emits Arabic-Indic digits, which the monospace face does
-not carry. The fix pins the numbering system; whether the result now looks the right *size* is a
-judgement only a screenshot can settle.
+Looking at it also found a defect no test would have: the day arc's end labels were drawn from
+`Prayer.shortName` — an ASCII identifier meant for the complication text budget — so they stayed
+"Fajr" and "Isha" in English while every other word on the screen was Arabic. Fixed.
 
-This is the project's standing pattern — every defect it has had was found by someone looking at a
-screen, not by a failing build. Plan accordingly.
+### Still not verified on hardware
+
+- **Both home screen widgets.** They cannot be placed from adb — `cmd appwidget` has no shell
+  implementation — so someone has to drag them onto a home screen once. Until then: whether the
+  layouts fit, whether the `Chronometer` counts down rather than up, whether the alarm fires close
+  enough to a boundary to look instant, and how the palette reads over a real wallpaper.
+- **The complications on a watch face**, for the same reason: adding one is a manual step. The phase
+  logic is unit-tested, but two things need sitting with the watch through a prayer — that a
+  countdown rolls over at the Adhan, and that a gauge sweeps without resetting when its text
+  switches to seconds.
+- **The light theme.**
+
+The seven glyphs — six prayers plus the mosque shown during an Iqama countdown — were rendered to
+PNG and inspected at 96px and 20px, so they are known to read at size, but not how they sit against
+a wallpaper. Two were redrawn after inspection: Sunrise and Maghrib had their direction arrow hidden
+inside the sun's arc, and the mosque's dome merged into its base at small size.
 
 ---
 
@@ -57,26 +78,36 @@ screen, not by a failing build. Plan accordingly.
 ### 1. Take the screenshots
 
 [docs/SCREENSHOT_PLAN.md](docs/SCREENSHOT_PLAN.md) is written as a device-test pass, not just an
-asset list. Eleven shots, each one a screen that has not been seen running; if a shot cannot be
-taken, that is the bug report. It covers Arabic, the light theme, the mosque picker, the correction
-steppers and the complications in one sweep, and says what to look at in each.
+asset list. Several of its shots have now been taken and the screens behind them verified — Today,
+date browsing, Arabic, the mosque picker, the watch app. What is left is the light theme, the two
+widgets and the complications on a face, all of which need a placement or a theme switch first.
 
-### 2. Exercise the nearby-mosque source on a device
+### 2. Place both widgets and a complication, and watch them through a prayer
 
-The riskiest untested path:
+The one category adb cannot reach on its own: `cmd appwidget` has no shell implementation, and
+adding a complication to a watch face is a manual step. Someone has to place them once; after that
+they survive reinstalls and can be screenshotted freely.
 
-- Does the picker find anything useful near the user? Mawaqit coverage is uneven — dense in some
-  cities, a single mosque in others.
-- Is the 45-minute sunrise tolerance right in practice? Too strict rejects good mosques; too loose
-  lets a broken one through.
-- Does the fallback to calculation happen silently and correctly when a mosque is rejected?
-- Do a mosque's own Iqama times appear, in both the offset and wall-clock forms?
+What only that will show:
 
-### 3. Verify phone → watch sync between real devices
+- Whether the RemoteViews layouts fit, at 5x1 and resized down.
+- Whether the `Chronometer` counts **down** rather than up — a wrong flag looks identical in code.
+- Whether an inexact alarm lands close enough to a prayer boundary to read as instant.
+- Whether the brightened palette holds up over a real wallpaper.
+- On the watch: that a countdown rolls over at the Adhan, and a gauge sweeps without resetting when
+  its text switches to seconds.
 
-Never exercised. The codec is unit-tested — 11 tests, including truncation and version skew — but no
-`DataItem` has crossed between two devices. Language mirroring rides the same path and is untested
-for the same reason.
+### 3. ~~Verify phone → watch sync between real devices~~ — done
+
+Exercised between an SM-S918B and an SM-L330. A freshly installed watch app showed "Set a location
+in the phone app"; once the phone republished, the watch had the full schedule, the countdown and
+the bezel ring. Language mirroring rides the same path and now has at least one real round trip
+behind it.
+
+The nearby-mosque source is likewise no longer untested: a real mosque was found near the configured
+location, listed with its own Iqama offsets. What remains unknown there is coverage elsewhere —
+Mawaqit is dense in some cities and sparse in others — and whether the 45-minute sunrise tolerance
+rejects the right calendars in practice.
 
 ### 4. Choose a licence
 
