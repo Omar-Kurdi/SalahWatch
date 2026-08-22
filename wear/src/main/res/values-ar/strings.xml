@@ -89,5 +89,4 @@
     <string name="complication_prayer_progress">مسار الصلاة</string>
     <string name="complication_adhan_countdown">العد التنازلي للأذان</string>
     <string name="complication_adhan_iqama_countdown">العد التنازلي للأذان والإقامة</string>
-    <string name="watch_licences">تُحسب المواقيت بمكتبة Adhan (رخصة MIT). التراخيص في تطبيق الهاتف.</string>
 </resources>

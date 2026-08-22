@@ -125,7 +125,6 @@ private fun PrayerScreen(calendar: PrayerCalendar?, now: Instant) {
                 items(today) { occurrence ->
                     ScheduleRow(occurrence, isNext = occurrence.adhan == next.adhan)
                 }
-                item { Attribution() }
             }
         }
     }
@@ -171,30 +170,6 @@ private fun NextPrayer(next: PrayerOccurrence, now: Instant) {
                 color = WearColors.InkFaint,
             )
         }
-    }
-}
-
-/**
- * Who the calculation library belongs to, and where the full notices are.
- *
- * The notices themselves ship inside this APK as a raw resource, which is what MIT and Apache 2.0
- * actually require. Fifteen kilobytes of licence text is not readable on a watch, so this points at
- * the phone rather than pretending otherwise.
- */
-@Composable
-private fun Attribution() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 26.dp, vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = stringResource(R.string.watch_licences),
-            style = MaterialTheme.typography.labelSmall,
-            color = WearColors.InkFaint,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-        )
     }
 }
 

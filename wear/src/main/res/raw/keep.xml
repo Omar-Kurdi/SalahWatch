@@ -2,10 +2,13 @@
 <!--
     Keeps the third-party notices in the watch APK.
 
-    Nothing in the watch app's code references `@raw/third_party_notices` — it has no screen large
-    enough to display fifteen kilobytes of licence text, and points at the phone app instead. That
-    makes the resource look unused, so enabling `shrinkResources` would strip it and the APK would
-    quietly stop carrying the MIT and Apache notices it is legally required to ship.
+    Nothing in the watch app references `@raw/third_party_notices`, and deliberately so: MIT and
+    Apache 2.0 require the notice to *accompany* the software, not to be displayed, and a watch has
+    no screen for fifteen kilobytes of licence text. The phone app shows it; this module only has to
+    carry it.
+
+    That makes the resource look unused, so enabling `shrinkResources` would strip it and the APK
+    would quietly stop shipping notices it is legally required to ship.
 
     Resource shrinking is currently off, so this is insurance against a future build change rather
     than a fix for today.
