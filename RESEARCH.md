@@ -182,10 +182,26 @@ information; a mosque's full year is embedded in its public page. Coverage is gl
 verified returning results across six cities on four continents, from around a dozen mosques in some
 to one in others.
 
-Compared against the same official national table, the two nearest mosques matched **all six times
-on all 31 days with zero deviation**, including the sunrise that calculation cannot reach. Seven
-further mosques spread over 70 km shared an *identical* error of 24 days, which is the conclusive
-detail: Mawaqit is not computing per coordinate, it is serving official city-zone tables.
+Nearby mosques do **not** all publish the same table, and none of the three near Al Ain reproduces
+the official one exactly. Measured against Awqaf's own published Al Ain table for August 2026, the
+nearest mosque (Sheikh Tahnoun, 2.6 km) deviates by at most a minute but not on every prayer:
+
+| Prayer | Exact | Days differing | Direction |
+|---|---|---|---|
+| Dhuhr | 30/31 | 1 | −1 |
+| Asr | 30/31 | 1 | −1 |
+| Shurooq | 28/31 | 3 | +1 |
+| Fajr | 27/31 | 4 | +1 |
+| Isha | 24/31 | 7 | −1 |
+| Maghrib | 23/31 | 8 | −1 |
+
+The other two mosques are on a different table again — identical to each other on all 366 days, and
+**5 minutes out on sunrise, 4 on Asr**. Agreement between mosques therefore indicates a shared
+upstream, *not* an official one, so selecting by consensus would pick the wrong table here.
+
+The practical consequence: a mosque source gets within a minute, which is far closer than
+calculation reaches, but it is a mosque's own timetable and not the authority's. Only the
+authority's published table reproduces the authority's times.
 
 ### 5.3 Why mosque data is validated rather than trusted
 

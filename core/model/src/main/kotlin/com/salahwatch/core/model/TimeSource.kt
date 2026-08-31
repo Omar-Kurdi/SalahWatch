@@ -17,9 +17,12 @@ public enum class TimeSource {
     /**
      * The published times of a nearby mosque, via Mawaqit.
      *
-     * These are the times a congregation actually prays by, so where a mosque follows its national
-     * timetable this matches it exactly rather than approximately — verified against the official
-     * national timetable for a month, where a nearby mosque matched all six times on all 31 days.
+     * These are the times a congregation actually prays by, which tracks a national timetable far
+     * more closely than a calculation can. It is not the same thing as the authority's table: a
+     * mosque publishes its own, and measured over a month against Awqaf's Al Ain table the nearest
+     * mosque was exact on 27/31 days for Fajr and 23/31 for Maghrib, never out by more than a
+     * minute. Neighbouring mosques can be on an entirely different table, so proximity alone does
+     * not imply the local authority's times.
      */
     NEARBY_MOSQUE,
 }
