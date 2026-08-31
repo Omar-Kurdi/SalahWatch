@@ -5,6 +5,7 @@ import androidx.compose.ui.res.stringResource
 import com.salahwatch.core.model.AppLanguage
 import com.salahwatch.core.model.IqamaMode
 import com.salahwatch.core.model.ThemeMode
+import com.salahwatch.core.model.OfficialArea
 import com.salahwatch.core.model.TimeSource
 
 /** Display names for the app's own settings, as opposed to the prayer domain's types. */
@@ -29,6 +30,7 @@ internal fun AppLanguage.label(): String = stringResource(
 @Composable
 internal fun TimeSource.label(): String = stringResource(
     when (this) {
+        TimeSource.OFFICIAL -> R.string.source_official
         TimeSource.CALCULATED -> R.string.source_calculated
         TimeSource.NEARBY_MOSQUE -> R.string.source_mosque
     },
@@ -37,8 +39,17 @@ internal fun TimeSource.label(): String = stringResource(
 @Composable
 internal fun TimeSource.description(): String = stringResource(
     when (this) {
+        TimeSource.OFFICIAL -> R.string.source_official_desc
         TimeSource.CALCULATED -> R.string.source_calculated_desc
         TimeSource.NEARBY_MOSQUE -> R.string.source_mosque_desc
+    },
+)
+
+@Composable
+internal fun OfficialArea.label(): String = stringResource(
+    when (this) {
+        OfficialArea.AL_AIN -> R.string.area_al_ain
+        OfficialArea.DUBAI -> R.string.area_dubai
     },
 )
 

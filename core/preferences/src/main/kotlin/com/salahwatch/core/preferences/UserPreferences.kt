@@ -5,6 +5,7 @@ import com.salahwatch.core.model.IqamaSettings
 import com.salahwatch.core.model.AppLanguage
 import com.salahwatch.core.model.LocationMode
 import com.salahwatch.core.model.MosqueRef
+import com.salahwatch.core.model.OfficialArea
 import com.salahwatch.core.model.TimeSource
 import com.salahwatch.core.model.ThemeMode
 import kotlinx.serialization.Serializable
@@ -21,8 +22,15 @@ public data class UserPreferences(
     val calculation: CalculationSettings = CalculationSettings(),
     val iqama: IqamaSettings = IqamaSettings(),
     val location: LocationMode = LocationMode.Automatic(),
-    val timeSource: TimeSource = TimeSource.CALCULATED,
+    val timeSource: TimeSource = TimeSource.OFFICIAL,
     val mosque: MosqueRef? = null,
+    /**
+     * Which bundled timetable to use, when [timeSource] is [TimeSource.OFFICIAL].
+     *
+     * Null means "decide from the location", which is what a fresh install does; setting it pins
+     * the choice so that travelling does not silently swap the user's timetable underneath them.
+     */
+    val officialArea: OfficialArea? = null,
     val theme: ThemeMode = ThemeMode.SYSTEM,
     val language: AppLanguage = AppLanguage.SYSTEM,
     /**

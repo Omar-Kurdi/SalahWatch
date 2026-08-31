@@ -2,6 +2,7 @@ package com.salahwatch.data.prayersync
 
 import android.util.Log
 import com.salahwatch.core.model.DaySchedule
+import com.salahwatch.core.model.OfficialArea
 import com.salahwatch.core.model.PrayerLocation
 import com.salahwatch.core.model.TimeSource
 import com.salahwatch.core.model.effectiveLocation
@@ -42,6 +43,7 @@ public sealed interface SyncResult {
 public class PrayerSyncer(
     private val source: PrayerTimeSource,
     private val mosqueSource: MosqueTimeSource? = null,
+    private val officialSource: OfficialTimeSource? = null,
     private val cache: ScheduleCache,
     private val syncState: SyncState,
     private val preferences: PreferencesSource,
@@ -107,6 +109,8 @@ public class PrayerSyncer(
                 fromMosque ?: fallbackToCalculation(location, prefs, years)
             }
 
+            TimeSource.OFFICIAL -> official(location, prefs, today, years)
+
             TimeSource.CALCULATED -> fallbackToCalculation(location, prefs, years)
         }
 
@@ -115,6 +119,40 @@ public class PrayerSyncer(
         cache.prune(today.minusDays(RETAIN_PAST_DAYS))
 
         return SyncResult.Fetched(days = fetched.size, years = years)
+    }
+
+    /**
+     * The area's published table, topped up with calculation past the end of the bundle.
+     *
+     * The top-up is conditional rather than automatic: a bundle covering the whole horizon is the
+     * normal case, and fetching a year of calculated times to discard them would put a network call
+     * on a path whose entire appeal is that it needs none. So calculation is fetched only when the
+     * published days genuinely run out inside the horizon, which happens near the end of a bundle
+     * and after travelling beyond the areas that have one.
+     */
+    private suspend fun official(
+        location: PrayerLocation,
+        prefs: UserPreferences,
+        today: LocalDate,
+        years: List<Int>,
+    ): List<DaySchedule> {
+        val area = prefs.officialArea
+            ?: OfficialArea.nearestTo(location.latitude, location.longitude)
+        val published = area?.let { officialSource?.calendarFor(it) }.orEmpty()
+
+        val covered = published.mapTo(HashSet()) { it.date }
+        val horizon = generateSequence(today) { it.plusDays(1) }
+            .takeWhile { it <= today.plusDays(MINIMUM_HORIZON_DAYS) }
+        if (published.isNotEmpty() && horizon.all { it in covered }) return published
+
+        if (area == null) {
+            Log.i(TAG, "No bundled timetable covers this location; calculating instead")
+        }
+
+        // Published days win where both exist, so the join keeps the authority's times and uses
+        // calculation only for the dates it does not reach.
+        return published + fallbackToCalculation(location, prefs, years)
+            .filterNot { it.date in covered }
     }
 
     /**

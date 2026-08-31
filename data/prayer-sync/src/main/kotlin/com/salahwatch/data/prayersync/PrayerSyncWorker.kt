@@ -36,6 +36,7 @@ public class PrayerSyncWorker(
         val syncer = PrayerSyncer(
             source = AlAdhanClient(),
             mosqueSource = MawaqitTimeSource(),
+            officialSource = BundledOfficialSource(applicationContext),
             cache = PrayerScheduleRepository(
                 dao = ScheduleStore.dao(applicationContext),
                 preferences = preferences,

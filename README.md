@@ -144,14 +144,35 @@ so the app works offline indefinitely.
 
 ## Prayer time accuracy
 
-Times come from one of two sources, chosen in Settings.
+Times come from one of three sources, chosen in Settings.
+
+**Official timetable** — the authority's own published table for your city, bundled with the app.
+The only source that reproduces a national timetable *exactly*, because it is that table rather than
+an approximation of it or a mosque's copy of it. Currently bundled for **Al Ain** and **Dubai**, from
+the [UAE General Authority of Islamic Affairs, Endowments and Zakat](https://www.awqaf.gov.ae/prayer-times).
+
+It needs no network at all: the data ships in the APK, so the exact times are available offline on a
+fresh install. The trade is coverage — each bundle ends on the last day the authority had published
+when it was captured, and past that the app falls back to calculation and marks the days
+accordingly. Refreshing is a manual, roughly annual job (see `docs/OFFICIAL_TIMETABLES.md`).
+
+Bundled files are validated at load rather than trusted: a transcription slip is silent by nature,
+since every value in the file is a plausible time. A record of the wrong length, an impossible time,
+a day out of order, or a date that does not exist in its month rejects the whole file, and the app
+falls back to calculation instead of showing part of a bad table.
 
 **Nearby mosque** — the published timetable of a mosque near you, via
 [Mawaqit](https://mawaqit.net). Where a mosque follows its national timetable, its times *are* that
 timetable rather than an approximation of it. Validated against an official national timetable for a
-full month, a nearby mosque matched **all six times on all 31 days, with zero deviation** — including
-the Sunrise that no calculation method reproduces. Works worldwide, subject to a mosque publishing
-nearby.
+full month, the nearest mosque was within a minute on every prayer — exact on 27/31 days for Fajr
+and 23/31 for Maghrib. Closer than any calculation reaches, including on the Sunrise no method
+reproduces, but not identical to the authority's table: a mosque publishes its own. Works worldwide,
+subject to a mosque publishing nearby.
+
+Proximity does not imply agreement. Of the three mosques near Al Ain, two are byte-identical to each
+other across all 366 days and **5 minutes out on Sunrise**; the third matches the official table
+closely. Mosques agreeing with each other indicates a shared upstream, not an official one, which is
+why the app never picks a table by consensus.
 
 Mosque data is validated before it is trusted, because it is entered by people. Calendars carry six
 *or seven* times a day, so the last six are taken — reading from the front would shift every prayer
@@ -159,7 +180,7 @@ by one slot, silently. And because at least one mosque declares a timezone it is
 calendar is checked against an independently computed sunrise and rejected if it disagrees by more
 than 45 minutes, falling back to calculation.
 
-**Calculation** — the default and the fallback. From the
+**Calculation** — the universal fallback, and the source everywhere the other two do not reach. From the
 [AlAdhan API](https://aladhan.com/prayer-times-api), requested by latitude/longitude with
 `iso8601=true` so every timestamp carries its own UTC offset and daylight saving needs no special
 handling. Works anywhere, but a calculation can only ever approximate a national timetable: measured
@@ -274,7 +295,8 @@ Release preparation lives in `docs/`:
 ## Privacy
 
 Approximate coordinates are sent to whichever prayer-time source you choose — AlAdhan, or Mawaqit
-when following a mosque — and to nothing else. Both are contacted anonymously: no account, no key,
+when following a mosque — and to nothing else. The official-timetable source sends nothing anywhere:
+it reads a file inside the app. Both are contacted anonymously: no account, no key,
 no identifier. City lookup uses Android's own `Geocoder` on the device, which needs no API key and
 no permission, so typing a city sends nothing through this app at all. There is no analytics and no
 tracking, precise location is never requested, and background location is not declared in either

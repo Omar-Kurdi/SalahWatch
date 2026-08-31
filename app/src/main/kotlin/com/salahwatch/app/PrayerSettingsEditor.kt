@@ -4,6 +4,7 @@ import com.salahwatch.core.model.AppLanguage
 import com.salahwatch.core.model.CalculationSettings
 import com.salahwatch.core.model.IqamaSettings
 import com.salahwatch.core.model.MosqueRef
+import com.salahwatch.core.model.OfficialArea
 import com.salahwatch.core.model.PrayerAdjustments
 import com.salahwatch.core.model.ThemeMode
 import com.salahwatch.core.model.TimeSource
@@ -74,6 +75,11 @@ public class PrayerSettingsEditor(
 
     public fun mosque(mosque: MosqueRef) = apply(refetch = true) {
         it.copy(mosque = mosque, timeSource = TimeSource.NEARBY_MOSQUE)
+    }
+
+    /** Picking an area also selects the source it belongs to, as picking a mosque does. */
+    public fun officialArea(area: OfficialArea) = apply(refetch = true) {
+        it.copy(officialArea = area, timeSource = TimeSource.OFFICIAL)
     }
 
     private fun apply(

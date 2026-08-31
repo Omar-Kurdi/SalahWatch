@@ -68,6 +68,12 @@
     <string name="complication_no_data_desc">Prayer times unavailable. Open the app to set a location.</string>
     <string name="settings_source">Prayer times from</string>
     <string name="settings_source_desc">Where the times themselves come from.</string>
+    <string name="source_official">Official timetable</string>
+    <string name="source_official_desc">The authority\'s own published times for your city. Exact, and works offline.</string>
+    <string name="area_al_ain">Al Ain</string>
+    <string name="area_dubai">Dubai</string>
+    <string name="area_automatic">Chosen from your location.</string>
+    <string name="area_none_nearby">No official timetable is bundled for your location, so times are calculated instead.</string>
     <string name="source_calculated">Calculation</string>
     <string name="source_calculated_desc">Astronomical, for your coordinates. Works anywhere.</string>
     <string name="source_mosque">Nearby mosque</string>

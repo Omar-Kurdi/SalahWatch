@@ -187,6 +187,7 @@ public data class ScheduleCacheKey(
                 source = listOfNotNull(
                     preferences.timeSource.name,
                     preferences.mosque?.id,
+                    preferences.officialArea?.slug,
                 ).joinToString(":"),
             )
     }

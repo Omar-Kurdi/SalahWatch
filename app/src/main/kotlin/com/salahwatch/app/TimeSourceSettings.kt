@@ -22,15 +22,17 @@ import com.salahwatch.app.ui.RadioRow
 import com.salahwatch.app.ui.SettingsDivider
 import com.salahwatch.app.ui.SettingsSection
 import com.salahwatch.core.model.MosqueRef
+import com.salahwatch.core.model.OfficialArea
 import com.salahwatch.core.model.TimeSource
+import com.salahwatch.core.model.effectiveLocation
 import com.salahwatch.core.preferences.UserPreferences
 
 /**
  * Where prayer times come from.
  *
- * Two genuinely different answers, so this is a radio pair rather than a hidden default. Calculation
- * works anywhere; a nearby mosque matches the local timetable exactly where one exists, because it
- * *is* the local timetable rather than an approximation of it.
+ * Three genuinely different answers, so these are radio rows rather than a hidden default. The
+ * area's official table is exact where one is bundled; a nearby mosque is the times a congregation
+ * actually prays by; calculation works anywhere and approximates both.
  */
 @Composable
 internal fun TimeSourceSection(preferences: UserPreferences, viewModel: PrayerViewModel) {
@@ -50,9 +52,58 @@ internal fun TimeSourceSection(preferences: UserPreferences, viewModel: PrayerVi
             )
         }
 
+        if (preferences.timeSource == TimeSource.OFFICIAL) {
+            SettingsDivider()
+            AreaPicker(preferences, viewModel)
+        }
+
         if (preferences.timeSource == TimeSource.NEARBY_MOSQUE) {
             SettingsDivider()
             MosquePicker(preferences.mosque, viewModel)
+        }
+    }
+}
+
+/**
+ * Which bundled timetable to follow.
+ *
+ * Shows the automatic choice as a selected row rather than leaving every row blank, so that a user
+ * who never opens this screen can still see which city's table their times came from — the one
+ * question a bundled timetable has to answer, since the wrong city looks entirely plausible.
+ */
+@Composable
+private fun AreaPicker(preferences: UserPreferences, viewModel: PrayerViewModel) {
+    val location = preferences.location.effectiveLocation
+    val automatic = location?.let { OfficialArea.nearestTo(it.latitude, it.longitude) }
+    val effective = preferences.officialArea ?: automatic
+
+    // Resolved up front because RadioRow's label is a plain lambda, not a composable one.
+    val names = OfficialArea.entries.associateWith { it.label() }
+
+    Column(Modifier.padding(vertical = 4.dp)) {
+        OfficialArea.entries.forEach { area ->
+            RadioRow(
+                option = area,
+                selected = effective,
+                label = { names.getValue(area) },
+                // Bound to `area` rather than the row's value because the selection is nullable
+                // (nothing is pinned yet) while the edit takes a definite area.
+                onSelect = { viewModel.edit.officialArea(area) },
+            )
+        }
+
+        val note = when {
+            effective == null -> stringResource(R.string.area_none_nearby)
+            preferences.officialArea == null -> stringResource(R.string.area_automatic)
+            else -> null
+        }
+        note?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.bodySmall,
+                color = LocalPalette.current.inkMuted,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+            )
         }
     }
 }

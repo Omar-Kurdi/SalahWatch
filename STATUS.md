@@ -141,6 +141,18 @@ the file alone does not satisfy it. Two placeholders in it need filling.
 
 ---
 
+## Official timetables
+
+Al Ain and Dubai ship the authority's own published table as an asset; see
+`docs/OFFICIAL_TIMETABLES.md` for the format and the refresh procedure.
+
+**Both bundles end 2027-06-05.** Past that the app falls back to calculation and marks the days as
+estimates, so nothing breaks — but the times stop being exact. Refresh before mid-2027; the site
+publishes far enough ahead that doing it once a year is comfortable.
+
+Not yet seen on a device: the area picker, and what a day past the end of a bundle looks like in the
+UI. Both are covered by unit tests, neither has been looked at on a screen.
+
 ## Decisions worth not revisiting
 
 | Decision | Why |

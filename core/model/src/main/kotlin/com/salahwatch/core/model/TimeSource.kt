@@ -6,6 +6,16 @@ import kotlinx.serialization.Serializable
 @Serializable
 public enum class TimeSource {
     /**
+     * The area's official published timetable, bundled with the app.
+     *
+     * The only source that reproduces a national timetable exactly, because it is that timetable
+     * rather than an approximation or a mosque's own copy of it. Available for the areas in
+     * [OfficialArea] and for the days their bundles cover; outside either, the app falls back to
+     * calculation and marks the day accordingly.
+     */
+    OFFICIAL,
+
+    /**
      * Calculated astronomically for your coordinates, via AlAdhan.
      *
      * Works anywhere and needs nothing but a location, but a calculation can only ever approximate

@@ -68,6 +68,12 @@
     <string name="complication_no_data_desc">المواقيت غير متوفرة. افتح التطبيق لتحديد الموقع.</string>
     <string name="settings_source">مصدر المواقيت</string>
     <string name="settings_source_desc">من أين تأتي الأوقات نفسها.</string>
+    <string name="source_official">التقويم الرسمي</string>
+    <string name="source_official_desc">المواقيت الرسمية المنشورة لمدينتك. دقيقة، وتعمل دون اتصال.</string>
+    <string name="area_al_ain">العين</string>
+    <string name="area_dubai">دبي</string>
+    <string name="area_automatic">اختير حسب موقعك.</string>
+    <string name="area_none_nearby">لا يوجد تقويم رسمي مضمَّن لموقعك، لذا تُحسب المواقيت فلكيًا.</string>
     <string name="source_calculated">حساب فلكي</string>
     <string name="source_calculated_desc">يُحسب لإحداثياتك، ويعمل في أي مكان.</string>
     <string name="source_mosque">مسجد قريب</string>

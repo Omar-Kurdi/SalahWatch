@@ -44,6 +44,18 @@ public interface MosqueTimeSource {
     ): List<DaySchedule>?
 }
 
+/**
+ * An area's bundled official timetable.
+ *
+ * Returns every day the bundle holds, which is generally *not* the range the caller wanted: these
+ * files end on the last day the authority had published. Callers fill the remainder themselves.
+ */
+public interface OfficialTimeSource {
+    public suspend fun calendarFor(
+        area: com.salahwatch.core.model.OfficialArea,
+    ): List<DaySchedule>?
+}
+
 /** Supplies current user settings. A function rather than a repository so tests need no DataStore. */
 public fun interface PreferencesSource {
     public suspend fun current(): UserPreferences

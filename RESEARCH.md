@@ -203,6 +203,28 @@ The practical consequence: a mosque source gets within a minute, which is far cl
 calculation reaches, but it is a mosque's own timetable and not the authority's. Only the
 authority's published table reproduces the authority's times.
 
+### 5.2b The authority's own published table
+
+Awqaf publishes UAE prayer times per city and area at
+<https://www.awqaf.gov.ae/prayer-times>, roughly eighteen months ahead. This is the only source that
+reproduces a national timetable exactly, for the obvious reason that it *is* the timetable.
+
+Two programmatic routes exist and neither is usable:
+
+- The **open-data API** (`api.government.ae`) grants access only to private-sector entities
+  registered in the UAE.
+- The **site's own endpoint**, `mobileappapi.awqaf.gov.ae/APIS/v3/prayer-time/prayertimes/
+  {year}/{month}/{city}/{area}`, returns `401` without a token, and the web client assembles both the
+  base URL and its token through a string-table indirection.
+
+So the data is **bundled as an asset** and refreshed by hand about once a year — see
+`docs/OFFICIAL_TIMETABLES.md`. The app makes no request to any authority at runtime.
+
+Al Ain's August 2026 bundle was verified day by day against an independently captured copy of the
+same month: 31/31 on all six prayers. Dubai's published table turns out to be *perpetual* — 2027 is
+identical to 2026 day for day — while Al Ain's is not, which is why the refresh procedure captures
+each year rather than assuming one repeats.
+
 ### 5.3 Why mosque data is validated rather than trusted
 
 Mosque timetables are entered by people, and two hazards appeared in live data:

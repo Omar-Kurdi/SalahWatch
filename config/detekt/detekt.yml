@@ -137,7 +137,9 @@ complexity:
     # fixtures towards mutable setup, which reads worse and is easier to get wrong.
     excludes: ['**/test/**', '**/androidTest/**']
     functionThreshold: 6
-    constructorThreshold: 7
+    # PrayerSyncer takes one collaborator per source it can read from, each defaulted so tests
+    # substitute only what they exercise. Adding a source is meant to add a parameter here.
+    constructorThreshold: 8
     ignoreDefaultParameters: false
     ignoreDataClasses: true
     ignoreAnnotatedParameter: []

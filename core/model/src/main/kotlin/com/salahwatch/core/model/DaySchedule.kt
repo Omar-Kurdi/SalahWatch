@@ -19,6 +19,14 @@ public enum class ScheduleSource {
 
     /** Computed on-device by the offline fallback. Must be displayed as an estimate. */
     LOCAL_ESTIMATE,
+
+    /**
+     * Transcribed from an authority's own published timetable. Authoritative.
+     *
+     * Appended rather than inserted: `ScheduleCodec` writes this enum's *ordinal* over the Data
+     * Layer, so reordering would silently reinterpret every schedule already on a watch.
+     */
+    OFFICIAL,
     ;
 
     public val isEstimate: Boolean get() = this == LOCAL_ESTIMATE
