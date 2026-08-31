@@ -71,6 +71,10 @@ the failure mode hardest to notice, because every value still looks plausible.
 Both were verified against the published table at capture: Al Ain's August 2026 was compared day by
 day against an independently taken copy of the same month, matching 31/31 on all six prayers.
 
+Dubai's 2027 file was **derived** from its 2026 one rather than captured month by month, after
+spot-checking January, March, May and June against the site and finding them identical. February and
+April were not compared. If that matters to you, recapture Dubai 2027 directly.
+
 One quirk worth knowing: Dubai's published table is **perpetual** — its 2027 values are identical to
 2026, day for day. Al Ain's are not. Do not assume either way when refreshing; capture what the site
 actually returns for the year you asked for.

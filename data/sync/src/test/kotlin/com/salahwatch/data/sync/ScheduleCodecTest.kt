@@ -8,6 +8,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -124,5 +125,16 @@ class ScheduleCodecTest {
         val error = runCatching { ScheduleCodec.encode(mixed) }.exceptionOrNull()
         assertTrue(error is IllegalArgumentException, "Mixed zones must fail loudly at encode time")
     }
-}
 
+    @Test
+    fun `round-trips an official schedule`() {
+        // ScheduleSource is written as an ordinal, so a value appended to the enum has to survive
+        // the trip. A watch on an older build cannot know this ordinal; it discards the payload and
+        // keeps what it has, which is why the enum is only ever appended to.
+        val day = day(LocalDate.of(2026, 8, 31), source = ScheduleSource.OFFICIAL)
+        val decoded = ScheduleCodec.decode(ScheduleCodec.encode(listOf(day)))
+
+        assertEquals(listOf(day), decoded)
+        assertFalse(decoded!!.single().source.isEstimate, "official times must not be marked")
+    }
+}

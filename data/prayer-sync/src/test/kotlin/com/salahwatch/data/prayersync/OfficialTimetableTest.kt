@@ -131,6 +131,24 @@ class OfficialTimetableTest {
     }
 
     @Test
+    fun `bundled timetables still reach past the horizon the syncer needs`() {
+        // Deliberately time-dependent: this is the assertion that fails when the shipped data goes
+        // stale. Refreshing is a manual annual job, so something has to notice, and a build failure
+        // months ahead of the last published day is the cheapest possible reminder.
+        // If this fails, follow docs/OFFICIAL_TIMETABLES.md.
+        val needed = LocalDate.now().plusDays(PrayerSyncer.MINIMUM_HORIZON_DAYS)
+        for (area in OfficialArea.entries) {
+            val parsed = assertNotNull(
+                OfficialTimetableParser.parse(File("src/main/assets/official/${area.slug}.json").readText()),
+            )
+            assertTrue(
+                parsed.last().date >= needed,
+                "${area.slug} runs out on ${parsed.last().date}; refresh the bundled timetables",
+            )
+        }
+    }
+
+    @Test
     fun `bundled days match the authority's published table`() {
         // Spot values read from Awqaf's own published tables when these bundles were captured. They
         // exist so that a future refresh cannot quietly shift the data: a regenerated file is meant
