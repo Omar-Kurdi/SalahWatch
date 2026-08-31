@@ -150,8 +150,12 @@ Al Ain and Dubai ship the authority's own published table as an asset; see
 estimates, so nothing breaks — but the times stop being exact. Refresh before mid-2027; the site
 publishes far enough ahead that doing it once a year is comfortable.
 
-Not yet seen on a device: the area picker, and what a day past the end of a bundle looks like in the
-UI. Both are covered by unit tests, neither has been looked at on a screen.
+Confirmed on hardware 2026-08-31: with no area chosen, the phone picked Al Ain from its location and
+both phone and watch showed Awqaf's published times for the day exactly — Fajr 4:39, Sunrise 5:53,
+Dhuhr 12:20, Asr 3:46, Maghrib 6:40 — unmarked, and the watch had them via the Data Layer.
+
+Still not seen on a screen: the area picker in Settings, and what a day past the end of a bundle
+looks like. Both are covered by unit tests only.
 
 ## Decisions worth not revisiting
 
