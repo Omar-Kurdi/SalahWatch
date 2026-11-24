@@ -7,7 +7,7 @@ Read this first, then [RESEARCH.md](RESEARCH.md) for why the technical decisions
 
 ## Current state
 
-Ten modules, two apps, **261 unit tests passing**, detekt clean, lint clean, all four APKs
+Ten modules, two apps, **180 unit tests passing**, detekt clean, lint clean, all four APKs
 building.
 
 | | State |
@@ -26,7 +26,7 @@ building.
 
 ### Devices are available — check before assuming otherwise
 
-A Samsung **SM-S918B** phone (Android 16, density 450) and a **SM-L330** watch (Wear OS, API 36,
+A Samsung **SM-S918B** phone (One UI 9, Android 17, density 450) and a **SM-L330** watch (One UI 9 Watch, API 37,
 480x480 @ 340) connect over adb, with both apps installed. Run `adb devices` at the moment you need
 it; an earlier version of this file asserted no device existed, went stale within the same day, and
 led to a run of claims being reported as unverifiable when they were not.
@@ -61,6 +61,25 @@ the user to unlock and keep them awake. Two devices means every `adb` call needs
 Looking at it also found a defect no test would have: the day arc's end labels were drawn from
 `Prayer.shortName` — an ASCII identifier meant for the complication text budget — so they stayed
 "Fajr" and "Isha" in English while every other word on the screen was Arabic. Fixed.
+
+### One UI 9 and SDK 37 (2026-11-24)
+
+Both devices took One UI 9 (Android 17 / Wear OS 7, API 37). Built unchanged against API 36, the app kept
+working: both complications stayed bound, and the watch app fits at text size 1.3. It then moved to
+compileSdk/targetSdk 37 on AGP 9.5.2. The release builds were checked on both devices:
+
+- **Calculation** fetched over HTTPS. Certificate Transparency is on by default at target 37, and
+  both hosts' certificates carry embedded SCTs.
+- **Phone → watch sync** woke the watch's listener and re-rendered both complications.
+- **Tapping a complication** opens the watch app.
+- **The strip widget** redraws.
+- **Nothing crashed** on either device.
+
+**Known issue, not caused by the upgrade:** Mawaqit's `api/2.0/mosque/search` now answers
+**HTTP 401**, from any client. Finding nearby mosques therefore fails ("Could not reach the mosque
+directory"). The sync for a mosque already being followed did complete, but that is not proof it
+still works. `PrayerSyncer` falls back to calculation when the mosque calendar fails, so whether the
+per-mosque page (`/en/<slug>`) is also affected is **not yet confirmed**.
 
 ### Still not verified on hardware
 
@@ -169,7 +188,7 @@ looks like. Both are covered by unit tests only.
 | **minSdk 33** on wear | Complication dynamic values start at API 33; below it a progress arc cannot animate without polling |
 | **JDK 21** required | `adhan2` ships Java 21 bytecode; JDK 17 fails at runtime |
 | Kotlin 2.4.10 + **KSP 2.3.11** | KSP versions its own line; 2.3.10 added Kotlin 2.4 support. There is no 2.4.x KSP |
-| compileSdk **36**, Compose BOM pinned to **2026.06.01** | Compose 1.12 and androidx.core 1.19 need compileSdk 37, which is preview-channel only and past AGP 8's ceiling |
+| compileSdk and targetSdk **37**, AGP **9.5.2** | Needed for current AndroidX (core 1.19, Compose 1.12, Wear Compose 1.7) and for Wear Widgets. Compose BOM stays at 2026.09.00 because 1.13 needs compileSdk 37.1 |
 | No dependency-injection framework | The graph is a handful of repositories with no variants |
 | `:data:prayer-times` has **no network** | Keeps `INTERNET` and `WAKE_LOCK` out of the watch APK. Fetching lives in `:data:prayer-sync` |
 

@@ -12,11 +12,12 @@ import org.gradle.kotlin.dsl.configure
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("com.android.application")
-        pluginManager.apply("org.jetbrains.kotlin.android")
+        // No org.jetbrains.kotlin.android: AGP 9 compiles Kotlin itself, and applying it fails.
 
         extensions.configure<ApplicationExtension> {
             defaultConfig.targetSdk = intVersion("targetSdk")
             configureAndroid(this)
         }
+        bundleThirdPartyNotices()
     }
 }

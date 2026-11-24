@@ -24,11 +24,13 @@ internal fun Project.intVersion(alias: String): Int =
  * desugars that when producing DEX, so a dependency compiled to a higher target than our own code is
  * not a conflict.
  */
-internal fun Project.configureAndroid(extension: CommonExtension<*, *, *, *, *, *>) {
+// AGP 9's CommonExtension is no longer generic and carries no block-style DSL functions (those
+// moved to the concrete extensions), so the shared settings below go through the property getters.
+internal fun Project.configureAndroid(extension: CommonExtension) {
     extension.apply {
         compileSdk = intVersion("compileSdk")
 
-        compileOptions {
+        compileOptions.apply {
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
             // adhan2 and kotlinx-datetime reach for java.time APIs. minSdk is 29/30 so java.time is
@@ -37,16 +39,14 @@ internal fun Project.configureAndroid(extension: CommonExtension<*, *, *, *, *, 
             isCoreLibraryDesugaringEnabled = true
         }
 
-        testOptions {
-            unitTests {
-                // Android framework classes are stubs that throw by default in JVM unit tests.
-                // Returning defaults instead lets code that merely logs be tested without either
-                // mocking the framework or injecting a logger seam purely to satisfy the runtime.
-                isReturnDefaultValues = true
-            }
+        testOptions.unitTests.apply {
+            // Android framework classes are stubs that throw by default in JVM unit tests.
+            // Returning defaults instead lets code that merely logs be tested without either
+            // mocking the framework or injecting a logger seam purely to satisfy the runtime.
+            isReturnDefaultValues = true
         }
 
-        packaging {
+        packaging.apply {
             resources.excludes += setOf(
                 "/META-INF/{AL2.0,LGPL2.1}",
                 "/META-INF/versions/9/previous-compilation-data.bin",

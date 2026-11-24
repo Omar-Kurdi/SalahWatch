@@ -1,4 +1,4 @@
-import com.android.build.gradle.LibraryExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -12,7 +12,7 @@ import org.gradle.kotlin.dsl.configure
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         pluginManager.apply("com.android.library")
-        pluginManager.apply("org.jetbrains.kotlin.android")
+        // No org.jetbrains.kotlin.android: AGP 9 compiles Kotlin itself, and applying it fails.
 
         extensions.configure<LibraryExtension> {
             defaultConfig.minSdk = intVersion("minSdkPhone")

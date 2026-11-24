@@ -18,5 +18,5 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
     }
 }
 
-private fun ExtensionContainer.findAndroidExtension(): CommonExtension<*, *, *, *, *, *>? =
-    findByName("android") as? CommonExtension<*, *, *, *, *, *>
+private fun ExtensionContainer.findAndroidExtension(): CommonExtension? =
+    findByName("android") as? CommonExtension

@@ -42,7 +42,7 @@ Read out of the release APKs with `aapt2 dump badging` / `dump xmltree`.
 | | Phone | Watch |
 |---|---|---|
 | `minSdk` | 29 (Android 10) | 33 (Wear OS 4) |
-| `targetSdk` / `compileSdk` | 36 | 36 |
+| `targetSdk` / `compileSdk` | 37 | 37 |
 | Permissions | `INTERNET`, `ACCESS_COARSE_LOCATION`, `ACCESS_NETWORK_STATE`, `FOREGROUND_SERVICE`, `WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED` | `RECEIVE_BOOT_COMPLETED` only |
 | Services | 1 (data-layer listener) | 7 — five complication providers, the listener, and Room's invalidation service |
 

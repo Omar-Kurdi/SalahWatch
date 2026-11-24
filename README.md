@@ -6,7 +6,7 @@ Glance at your watch face and see the next prayer, when the Adhan is called, whe
 starts, and how long you have. Five separate complication providers mean you can fill several slots
 on one watch face independently.
 
-> **Status:** running on real hardware — a Galaxy S23 Ultra and a Galaxy Watch — with 261 unit tests
+> **Status:** running on real hardware — a Galaxy S23 Ultra and a Galaxy Watch — with 180 unit tests
 > passing and lint clean. Both apps, both widgets and the complications have been seen working.
 > **[STATUS.md](STATUS.md)** lists what is verified, what is not, and what remains before release.
 
@@ -259,7 +259,7 @@ timezone, DST and midnight-rollover logic is unit-testable without an emulator.
 
 ## Verification status
 
-**Done:** 261 unit tests passing, detekt clean, lint clean, all four APKs build. Covered by tests: DST
+**Done:** 180 unit tests passing, detekt clean, lint clean, all four APKs build. Covered by tests: DST
 transitions in both directions, timezone travel, Isha Iqama crossing midnight, the year boundary,
 cache invalidation on moving or changing method, GPS jitter tolerance, Data Layer payload limits,
 mosque calendar validation, corrections applied on read, both forms a mosque publishes its Iqama in,

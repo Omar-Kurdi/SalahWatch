@@ -27,6 +27,7 @@ respect the 300-second minimum update period. The older Tizen documentation does
 | 4 | 13 | 33 | Watch 4/5/6 updates, Watch 6 launch |
 | 5 | 14 | 34 | Watch 7 / Ultra |
 | 6 | 16 | 36 | Watch 8 launch; One UI 8 Watch rolling back to Watch 4 |
+| 7 | 17 | 37 | One UI 9 Watch, from November 2026 (Watch 8 first). No complication API changes |
 
 ### 1.2 Why minSdk is exactly 33 on the watch
 
@@ -42,7 +43,7 @@ That is what lets every provider declare `UPDATE_PERIOD_SECONDS=0`. Going higher
 OS 5 and 6 add no complication APIs, so raising the floor would drop devices for no functional gain.
 The complication AARs themselves declare `minSdkVersion 26`, so they are not the constraint.
 
-Phone `minSdk` is 29; `compileSdk` and `targetSdk` are 36 on both.
+Phone `minSdk` is 29; `compileSdk` and `targetSdk` are 37 on both.
 
 ### 1.3 What is actually in the shipped artifacts
 
@@ -301,8 +302,8 @@ in prose.
 |---|---|---|
 | `androidx.wear.watchface:watchface-complications-data-source-ktx` | 1.3.0 | complications |
 | `androidx.wear.protolayout:protolayout-expression` | 1.4.2 | `DynamicFloat` — pinned, since the transitive 1.0.0 predates the expression schema needed |
-| `androidx.wear.compose:compose-material3` / `-foundation` | 1.6.2 | watch UI |
-| `androidx.compose:compose-bom` | 2026.06.01 | phone UI |
+| `androidx.wear.compose:compose-material3` / `-foundation` | 1.7.2 | watch UI |
+| `androidx.compose:compose-bom` | 2026.09.00 | phone UI |
 | `com.batoulapps.adhan:adhan2` | 0.0.7 | offline calculation (MIT, Meeus algorithms) |
 | `androidx.room` | 2.8.4 | schedule cache |
 | `androidx.datastore:datastore-preferences` | 1.2.1 | settings |
@@ -312,14 +313,18 @@ in prose.
 | `okhttp` | 5.4.0 | API clients |
 | `kotlinx-serialization-json` | 1.11.0 | JSON |
 
-Toolchain: Kotlin 2.4.10, KSP 2.3.11, AGP 8.13.2, **JDK 21**, detekt 1.23.8.
+Toolchain: Kotlin 2.4.10, KSP 2.3.11, Gradle 9.9.2, AGP 9.5.2, **JDK 21**, detekt 1.23.8.
 
-Three version constraints that are not free choices:
+Four version constraints that are not free choices:
 
 - **JDK 21** — `adhan2` 0.0.7 ships Java 21 bytecode. JDK 17 fails at runtime.
 - **KSP 2.3.11** — KSP versions its own line. 2.3.10 added Kotlin 2.4 support; there is no 2.4.x KSP.
-- **Compose BOM pinned to 2026.06.01** — Compose 1.12 and androidx.core 1.19 require compileSdk 37,
-  which is preview-channel only and past AGP 8's ceiling.
+- **AGP 9.5 for compileSdk 37** — AGP 9.5 supports up to API 37 and needs Gradle 9.6 or later. AGP 9
+  compiles Kotlin itself, so the convention plugins no longer apply `org.jetbrains.kotlin.android`;
+  one side effect is that `kotlin-test` must be named as `kotlin-test-junit`, which the old plugin
+  used to infer.
+- **Compose BOM 2026.09.00** (Compose 1.12.1) — 2026.11.01 ships Compose 1.13, which needs
+  compileSdk 37.1 rather than 37.0.
 
 **No dependency-injection framework.** The object graph is a handful of repositories with no variants
 or alternative bindings, so a container would add a build step and a layer of indirection without
